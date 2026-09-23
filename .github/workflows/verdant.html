@@ -1,0 +1,2240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VERDANT — Autonomous Irrigation Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2EEE3;
+  --paper-2:#EAE3D2;
+  --stone:#DCD2B8;
+  --stone-2:#CDC1A2;
+  --ink:#231F19;
+  --ink-dim:#6B6553;
+  --ink-faint:#9C9480;
+  --forest:#374C30;
+  --forest-dim:#63755A;
+  --forest-pale:#B7C4A4;
+  --soil:#8A6B49;
+  --soil-dry:#BC9968;
+  --water:#3B6C85;
+  --water-pale:#9EC0CE;
+  --amber:#A97A34;
+  --red:#9C4B3A;
+  --line:#D3C8A6;
+  --card:#FBF9F1;
+  --r-safe-t: env(safe-area-inset-top, 0px);
+  --r-safe-b: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:'Plus Jakarta Sans',-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-top:var(--r-safe-t);
+  overflow-x:hidden;
+}
+.mono{font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--stone-2);border-radius:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+button{font-family:inherit;}
+button:focus-visible, [tabindex]:focus-visible, a:focus-visible{outline:2px solid var(--forest); outline-offset:2px;}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
+
+/* ============================================================ HEADER ============================================================ */
+header{position:sticky;top:0;z-index:60;background:rgba(242,238,227,0.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+.head-row{display:flex;align-items:center;gap:30px;padding:14px 24px;max-width:1500px;margin:0 auto;}
+.wordmark{display:flex;align-items:baseline;gap:9px;cursor:pointer;background:none;border:none;padding:0;}
+.wordmark .wm-main{font-size:19px;font-weight:800;letter-spacing:0.2px;color:var(--forest);}
+.wordmark .wm-sub{font-size:10px;color:var(--ink-faint);letter-spacing:1.2px;font-weight:600;}
+nav.pri{display:flex;gap:2px;margin-left:8px;}
+nav.pri button{
+  background:none;border:none;color:var(--ink-dim);font-size:14px;font-weight:600;
+  padding:9px 14px;border-radius:8px;cursor:pointer;transition:background .15s,color .15s;
+}
+nav.pri button:hover{background:var(--paper-2);color:var(--ink);}
+nav.pri button.active{color:var(--forest);background:var(--stone);}
+.head-spacer{flex:1;}
+.mode-toggle{display:flex;background:var(--paper-2);border:1px solid var(--line);border-radius:9px;padding:2px;}
+.mode-toggle button{background:none;border:none;font-size:11.5px;font-weight:700;letter-spacing:.4px;color:var(--ink-faint);padding:6px 11px;border-radius:7px;cursor:pointer;}
+.mode-toggle button.active{background:var(--card);color:var(--forest);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+.btn-demo{background:var(--forest);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .15s,transform .15s;}
+.btn-demo:hover{background:#2c3e26;}
+.btn-demo:active{transform:scale(.97);}
+.btn-demo .dot{width:6px;height:6px;border-radius:50%;background:#8FD06B;animation:pulse-dot 1.8s ease-in-out infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.35;}}
+@media (max-width: 880px){ nav.pri{display:none;} }
+.btn-present{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;margin-left:4px;}
+.btn-present:hover{background:var(--paper-2);}
+.btn-present.active{background:var(--forest);color:#fff;border-color:var(--forest);}
+body.presentation-mode header,
+body.presentation-mode footer,
+body.presentation-mode .zoom-toolbar{display:none;}
+body.presentation-mode #view-explore .stage-wrap{height:100vh;}
+body.presentation-mode #app{display:block !important;}
+body.presentation-mode #hero{display:none !important;}
+.present-exit{position:fixed;top:16px;right:16px;z-index:80;background:rgba(35,31,25,.72);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;backdrop-filter:blur(6px);}
+.present-exit.hidden{display:none;}
+
+/* ============================================================ HERO ============================================================ */
+#hero{position:relative;min-height:calc(100vh - 62px);display:flex;flex-direction:column;justify-content:center;padding:60px 24px 40px;max-width:1500px;margin:0 auto;}
+#hero.hidden{display:none;}
+.hero-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:center;}
+@media (max-width:980px){.hero-grid{grid-template-columns:1fr;gap:36px;}}
+.hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1.5px;color:var(--forest-dim);font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:9px;}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--forest-dim);}
+.hero-title{font-size:clamp(40px,6vw,68px);font-weight:800;line-height:.98;letter-spacing:-1.5px;color:var(--ink);margin:0 0 22px;}
+.hero-title em{font-style:normal;color:var(--forest);}
+.hero-sub{font-size:17px;line-height:1.55;color:var(--ink-dim);max-width:480px;margin:0 0 34px;}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.hbtn{border-radius:10px;padding:14px 22px;font-size:14.5px;font-weight:700;cursor:pointer;border:1px solid transparent;transition:transform .15s,background .15s;}
+.hbtn:active{transform:scale(.97);}
+.hbtn.primary{background:var(--forest);color:#fff;}
+.hbtn.primary:hover{background:#2c3e26;}
+.hbtn.ghost{background:var(--card);color:var(--ink);border-color:var(--line);}
+.hbtn.ghost:hover{background:var(--paper-2);}
+.hero-visual{position:relative;aspect-ratio:1/1;border-radius:18px;overflow:hidden;background:linear-gradient(160deg,#E7E0C9,#D6CCA8);border:1px solid var(--line);}
+.hero-visual canvas{display:block;width:100%;height:100%;}
+.hero-tag{position:absolute;bottom:16px;left:16px;background:rgba(251,249,241,.88);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:9px;padding:8px 12px;font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--ink-dim);display:flex;align-items:center;gap:7px;}
+.hero-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--forest-dim);}
+
+/* ============================================================ VIEWS ============================================================ */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ---- Explore (3D stage) ---- */
+#view-explore{position:relative;}
+.stage-wrap{position:relative;height:calc(100vh - 62px);min-height:520px;background:linear-gradient(180deg,#E9E1C6,#DCD1AC);overflow:hidden;}
+#stage3d{position:absolute;inset:0;display:block;width:100%;height:100%;cursor:grab;}
+#stage3d:active{cursor:grabbing;}
+.stage-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--ink-faint);font-size:13px;background:var(--paper);z-index:5;transition:opacity .4s;}
+.stage-loading .spin{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--stone-2);border-top-color:var(--forest);animation:spin 0.9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.status-bar{position:absolute;left:20px;top:20px;display:flex;flex-wrap:wrap;gap:0;background:rgba(251,249,241,.88);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:10px;padding:9px 4px;font-family:'JetBrains Mono',monospace;font-size:11.5px;z-index:8;box-shadow:0 2px 10px rgba(0,0,0,.05);}
+.status-bar .si{padding:0 11px;border-right:1px solid var(--line);color:var(--ink-dim);white-space:nowrap;}
+.status-bar .si:last-child{border-right:none;}
+.status-bar .si b{color:var(--ink);font-weight:600;}
+.status-bar .si .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--ink-faint);margin:0 5px 0 3px;}
+.status-bar .si.on .dot{background:var(--forest);}
+.status-bar .si.off .dot{background:var(--red);}
+.status-bar .si.on b{color:var(--forest);}
+.status-bar .si.off b{color:var(--red);}
+@media (max-width:700px){.status-bar{left:10px;top:10px;font-size:10px;max-width:calc(100% - 20px);overflow-x:auto;}}
+
+.explain-btn{position:absolute;right:20px;top:20px;z-index:8;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 14px;font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.05);}
+.explain-btn:hover{background:var(--paper-2);}
+.explain-btn.on{background:var(--forest);color:#fff;border-color:var(--forest);}
+
+.cam-toolbar{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:6px;background:rgba(251,249,241,.9);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:11px;padding:5px;z-index:8;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.cam-toolbar button{background:none;border:none;font-size:12px;font-weight:700;color:var(--ink-dim);padding:8px 13px;border-radius:8px;cursor:pointer;}
+.cam-toolbar button:hover{background:var(--paper-2);}
+.cam-toolbar button.active{background:var(--forest);color:#fff;}
+.zoom-toolbar{position:absolute;bottom:20px;right:20px;display:flex;flex-direction:column;gap:4px;z-index:8;}
+.zoom-toolbar button{width:34px;height:34px;border-radius:9px;background:rgba(251,249,241,.9);border:1px solid var(--line);font-size:16px;color:var(--ink-dim);cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.05);}
+.zoom-toolbar button:hover{background:var(--paper-2);}
+
+.inspector{position:absolute;width:230px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 15px 15px;z-index:12;box-shadow:0 10px 30px rgba(30,25,15,.16);animation:pop-in .18s cubic-bezier(.2,.8,.3,1.2);}
+.inspector.hidden{display:none;}
+@keyframes pop-in{from{opacity:0;transform:scale(.94) translateY(4px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.insp-close{position:absolute;top:9px;right:9px;background:none;border:none;font-size:17px;color:var(--ink-faint);cursor:pointer;line-height:1;padding:2px;}
+.insp-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.8px;color:var(--forest-dim);font-weight:600;text-transform:uppercase;}
+.insp-title{font-size:15px;font-weight:700;color:var(--ink);margin:3px 0 11px;padding-right:16px;}
+.insp-row{display:flex;justify-content:space-between;padding:5px 0;border-top:1px solid var(--line);font-size:12.5px;}
+.insp-row:first-of-type{border-top:none;}
+.ir-label{color:var(--ink-faint);}
+.ir-value{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--ink);}
+.insp-actions{margin-top:11px;display:flex;flex-direction:column;gap:6px;}
+.insp-actions button{width:100%;border-radius:8px;padding:9px;font-size:12.5px;font-weight:700;cursor:pointer;background:var(--paper-2);border:1px solid var(--line);color:var(--ink);}
+.insp-actions button.primary{background:var(--water);color:#fff;border-color:var(--water);}
+
+.explain-caption{position:absolute;left:50%;bottom:76px;transform:translateX(-50%);background:var(--ink);color:#F2EEE3;padding:12px 20px;border-radius:11px;font-size:13.5px;max-width:400px;text-align:center;z-index:11;box-shadow:0 10px 24px rgba(0,0,0,.2);}
+.explain-caption b{color:#fff;}
+.explain-caption .ec-title{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1px;color:#B7C4A4;text-transform:uppercase;margin-bottom:4px;}
+.explain-caption .ec-nav{margin-top:9px;display:flex;justify-content:center;gap:6px;}
+.explain-caption .ec-nav span{width:5px;height:5px;border-radius:50%;background:#5c5747;}
+.explain-caption .ec-nav span.on{background:#B7C4A4;}
+
+.story-banner{position:absolute;left:50%;top:76px;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 20px;font-size:13.5px;max-width:460px;text-align:center;z-index:11;box-shadow:0 10px 26px rgba(0,0,0,.12);}
+.story-banner.hidden{display:none;}
+.story-banner .sb-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1px;color:var(--forest-dim);text-transform:uppercase;margin-bottom:4px;}
+.story-banner .sb-step{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.6px;color:var(--forest-dim);font-weight:700;margin-bottom:3px;}
+.story-banner .sb-close{position:absolute;top:8px;right:9px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;}
+
+/* ============================================================ HOW IT WORKS ============================================================ */
+.page{max-width:1080px;margin:0 auto;padding:64px 24px 90px;}
+.page-head{margin-bottom:48px;}
+.page-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:1.2px;color:var(--forest-dim);font-weight:600;text-transform:uppercase;margin-bottom:10px;}
+.page-title{font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-1px;margin:0 0 12px;}
+.page-sub{font-size:15.5px;color:var(--ink-dim);max-width:600px;line-height:1.55;}
+
+.steps5{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:56px;}
+@media (max-width:900px){.steps5{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.steps5{grid-template-columns:1fr;}}
+.step5{background:var(--card);padding:24px 20px;cursor:pointer;transition:background .15s;}
+.step5:hover{background:var(--paper-2);}
+.step5 .s5-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--forest-dim);font-weight:700;margin-bottom:14px;}
+.step5 .s5-title{font-size:15px;font-weight:700;margin-bottom:8px;}
+.step5 .s5-body{font-size:12.5px;color:var(--ink-dim);line-height:1.5;}
+
+.arch-diagram{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:30px;margin-bottom:56px;}
+.arch-row{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;}
+.arch-node{background:var(--paper-2);border:1px solid var(--line);border-radius:11px;padding:14px 18px;text-align:center;cursor:pointer;min-width:118px;transition:background .15s,border-color .15s;}
+.arch-node:hover{background:var(--stone);}
+.arch-node.actuator{border-color:var(--water-pale);}
+.arch-node .an-label{font-size:13px;font-weight:700;}
+.arch-node .an-sub{font-size:10.5px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.arch-arrow{color:var(--ink-faint);font-size:18px;padding:0 12px;position:relative;min-width:34px;text-align:center;}
+.arch-node{position:relative;}
+.arch-node .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:7px;background:var(--ink-faint);vertical-align:middle;transition:background .3s;}
+.arch-node.live-active{border-color:var(--forest-dim);background:#EEF1E7;}
+.arch-node.live-active .live-dot{background:var(--forest);box-shadow:0 0 0 3px rgba(55,76,48,.14);}
+.arch-node.live-warn .live-dot{background:var(--amber);}
+.arch-node.live-fault{border-color:var(--red);background:#F7E9E4;}
+.arch-node.live-fault .live-dot{background:var(--red);box-shadow:0 0 0 3px rgba(156,75,58,.14);}
+.arch-arrow .pkt{position:absolute;top:50%;left:6px;width:6px;height:6px;border-radius:50%;background:var(--water);opacity:0;transform:translateY(-50%);pointer-events:none;}
+.arch-arrow.flowing .pkt{animation:pkt-move 1.3s linear infinite;}
+@keyframes pkt-move{0%{left:6px;opacity:0;}12%{opacity:1;}88%{opacity:1;}100%{left:calc(100% - 6px);opacity:0;}}
+.arch-map-caption{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);text-align:center;margin-top:16px;}
+.arch-leaves{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;}
+
+.glossary{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+@media (max-width:700px){.glossary{grid-template-columns:1fr;}}
+.gloss-item{background:var(--card);padding:20px 22px;}
+.gloss-item h4{margin:0 0 6px;font-size:14px;font-weight:700;}
+.gloss-item p{margin:0;font-size:12.5px;color:var(--ink-dim);line-height:1.5;}
+
+/* ============================================================ CONTROL (phone) ============================================================ */
+#view-control .page{max-width:1180px;}
+.control-layout{display:grid;grid-template-columns:340px 1fr;gap:50px;align-items:start;}
+@media (max-width:920px){.control-layout{grid-template-columns:1fr;justify-items:center;}}
+
+.phone-shell{width:320px;height:660px;background:#1c1a15;border-radius:42px;padding:12px;box-shadow:0 24px 60px rgba(20,16,8,.28),0 2px 6px rgba(0,0,0,.1);position:relative;}
+.phone-screen{width:100%;height:100%;background:var(--paper);border-radius:32px;overflow:hidden;position:relative;display:flex;flex-direction:column;}
+.phone-notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:84px;height:20px;background:#1c1a15;border-radius:12px;z-index:5;}
+.phone-statusrow{padding:16px 20px 6px;display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--ink);}
+.phone-body{flex:1;overflow-y:auto;padding:6px 18px 18px;}
+.phone-tabs{display:flex;border-top:1px solid var(--line);background:var(--card);}
+.phone-tabs button{flex:1;background:none;border:none;padding:12px 4px 10px;font-size:9.5px;font-weight:700;color:var(--ink-faint);cursor:pointer;letter-spacing:.3px;}
+.phone-tabs button.active{color:var(--forest);}
+
+.ph-greet{font-size:11px;color:var(--ink-faint);font-weight:600;letter-spacing:.5px;margin:10px 0 2px;text-transform:uppercase;}
+.ph-status-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin:8px 0 14px;}
+.ph-status-card .psc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.ph-status-card .psc-title{font-size:16px;font-weight:700;}
+.ph-status-card .psc-badge{font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:20px;background:var(--forest-pale);color:#2b3d26;}
+.ph-status-card .psc-badge.warn{background:#EAD3AE;color:#6b4a1a;}
+.psc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.psc-stat .ps-label{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.4px;}
+.psc-stat .ps-value{font-size:17px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-top:2px;}
+
+.phone-zone{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:9px;cursor:pointer;transition:border-color .15s;}
+.phone-zone:hover{border-color:var(--forest-dim);}
+.phone-zone .pz-top{display:flex;justify-content:space-between;align-items:center;}
+.pz-name{font-size:13px;font-weight:700;}
+.pz-sub{font-size:11px;color:var(--ink-faint);margin-top:1px;}
+.pz-pct{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.pz-bar{height:5px;background:var(--stone);border-radius:3px;margin-top:10px;overflow:hidden;}
+.pz-bar-fill{height:100%;background:var(--water);border-radius:3px;transition:width .4s;}
+.pz-tag{display:inline-block;margin-top:8px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.pz-tag.needs{background:#EAD3AE;color:#6b4a1a;}
+.pz-tag.ok{background:var(--forest-pale);color:#2b3d26;}
+.pz-tag.watering{background:var(--water-pale);color:#1f3f4d;}
+
+.irrigate-btn{width:100%;background:var(--water);color:#fff;border:none;border-radius:11px;padding:12px;font-size:13.5px;font-weight:700;cursor:pointer;margin-top:8px;}
+.irrigate-btn:disabled{opacity:.5;cursor:default;}
+.irrigate-btn.stop{background:var(--red);}
+
+.cmd-chain{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+.cmd-chain.hidden{display:none;}
+.cmd-step{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint);padding:4px 0;display:flex;gap:8px;align-items:center;}
+.cmd-step.done{color:var(--forest);}
+.cmd-step .cs-dot{width:6px;height:6px;border-radius:50%;background:var(--stone-2);flex-shrink:0;}
+.cmd-step.done .cs-dot{background:var(--forest);}
+
+.mini3d{width:100%;height:150px;border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#E7E0C9,#D6CCA8);margin-bottom:12px;}
+.mini3d canvas{width:100%;height:100%;display:block;}
+
+.ph-sectitle{font-size:10.5px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;}
+
+.control-panel{display:flex;flex-direction:column;gap:24px;}
+.panel-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px;}
+.panel-card h3{margin:0 0 4px;font-size:16px;font-weight:700;}
+.panel-card .pc-sub{font-size:12.5px;color:var(--ink-faint);margin-bottom:18px;}
+
+.rule-flow{display:flex;flex-direction:column;gap:0;}
+.rule-block{display:flex;align-items:flex-start;gap:14px;padding:12px 0;}
+.rule-block .rb-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--forest-dim);width:70px;flex-shrink:0;padding-top:2px;text-transform:uppercase;}
+.rule-block .rb-content{flex:1;font-size:13.5px;line-height:1.5;}
+.rule-arrow-row{text-align:center;color:var(--ink-faint);font-size:14px;padding:1px 0;padding-left:70px;text-align:left;}
+.thresh-row{display:flex;align-items:center;gap:10px;margin:5px 0;}
+.thresh-row input[type=range]{flex:1;accent-color:var(--forest);}
+.thresh-row .th-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;width:38px;text-align:right;}
+.mode-segment{display:flex;background:var(--paper-2);border:1px solid var(--line);border-radius:9px;padding:2px;margin-bottom:6px;}
+.mode-segment button{flex:1;background:none;border:none;padding:8px;font-size:12px;font-weight:700;color:var(--ink-faint);border-radius:7px;cursor:pointer;}
+.mode-segment button.active{background:var(--card);color:var(--forest);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+.stop-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
+.chip{background:var(--paper-2);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:11.5px;font-weight:600;color:var(--ink-dim);cursor:pointer;}
+.chip.on{background:var(--forest-pale);border-color:var(--forest-dim);color:#2b3d26;}
+.advanced-toggle{background:none;border:none;color:var(--forest-dim);font-size:12px;font-weight:700;cursor:pointer;padding:0;margin-top:14px;}
+.advanced-body{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+.advanced-body.open{display:block;}
+.manual-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px;}
+.manual-row:first-child{border-top:none;}
+.mr-name{flex:1;}
+.mr-state{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);}
+.mini-toggle{width:34px;height:19px;border-radius:20px;background:var(--stone-2);cursor:pointer;position:relative;transition:background .2s;}
+.mini-toggle.on{background:var(--forest);}
+.mini-toggle .kb{width:15px;height:15px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+.mini-toggle.on .kb{left:17px;}
+
+.test-list{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+@media (max-width:500px){.test-list{grid-template-columns:1fr;}}
+.test-item{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;border:1px solid var(--line);border-radius:10px;font-size:12.5px;}
+.test-item .ti-name{font-weight:600;}
+.diag-chain{margin-top:16px;background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;}
+.diag-chain.hidden{display:none;}
+.chain-title{font-size:10.5px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.chain-step{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--red);padding:2px 0;}
+.chain-arrow{color:var(--ink-faint);font-size:12px;padding-left:2px;}
+.chain-step.ok{color:var(--forest);}
+.chain-step.bad{color:var(--red);}
+.chain-step.info{color:var(--ink-dim);}
+.chain-step.final{font-weight:700;color:var(--ink);}
+
+.decision-panel{position:absolute;right:20px;top:70px;width:236px;background:rgba(251,249,241,.96);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:12px;padding:14px 16px;z-index:9;box-shadow:0 10px 26px rgba(0,0,0,.1);}
+.decision-panel.hidden{display:none;}
+.decision-panel .dp-close{position:absolute;top:8px;right:9px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;}
+.decision-panel .dp-title{font-size:10.5px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.decision-panel .chain-step{font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 0;}
+
+.follow-water-btn{position:absolute;bottom:20px;right:20px;z-index:8;background:var(--forest);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.15);}
+.follow-water-btn:hover{background:#2c3e26;}
+@media (max-width:700px){.follow-water-btn{right:10px;bottom:10px;padding:9px 13px;font-size:11.5px;}}
+
+/* ============================================================ DATA ============================================================ */
+.data-topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;flex-wrap:wrap;gap:12px;}
+.range-seg{display:flex;background:var(--paper-2);border:1px solid var(--line);border-radius:9px;padding:2px;}
+.range-seg button{background:none;border:none;padding:7px 13px;font-size:12px;font-weight:700;color:var(--ink-faint);border-radius:7px;cursor:pointer;}
+.range-seg button.active{background:var(--card);color:var(--forest);}
+.timeline{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:40px;max-height:360px;overflow-y:auto;}
+.tl-row{display:flex;gap:16px;padding:10px 20px;border-top:1px solid var(--line);font-size:13px;align-items:baseline;}
+.tl-row:first-child{border-top:none;}
+.tl-time{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-faint);width:56px;flex-shrink:0;}
+.tl-msg.crit{color:var(--red);font-weight:600;}
+.tl-msg.warn{color:var(--amber);font-weight:600;}
+.tl-msg.ok{color:var(--forest);}
+
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+@media (max-width:760px){.charts-grid{grid-template-columns:1fr;}}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;}
+.chart-card h4{margin:0 0 2px;font-size:13.5px;font-weight:700;}
+.chart-card .cc-sub{font-size:11px;color:var(--ink-faint);margin-bottom:10px;}
+.chart-card canvas{width:100%;height:120px;display:block;}
+
+/* ============================================================ FOOTER ============================================================ */
+footer{text-align:center;font-size:11.5px;color:var(--ink-faint);padding:26px 20px calc(26px + var(--r-safe-b));border-top:1px solid var(--line);background:var(--paper-2);}
+
+/* Simple mode hides engineering-only bits */
+body.simple .eng-only{display:none !important;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-row">
+    <button class="wordmark" id="logo-btn"><span class="wm-main">VERDANT</span><span class="wm-sub">IRRIGATION TWIN</span></button>
+    <nav class="pri" id="pri-nav">
+      <button data-view="explore" class="active">Explore</button>
+      <button data-view="how">How it works</button>
+      <button data-view="control">Control</button>
+      <button data-view="data">Data</button>
+    </nav>
+    <div class="head-spacer"></div>
+    <div class="mode-toggle" id="sim-toggle">
+      <button data-simmode="simple" class="active">Simple</button>
+      <button data-simmode="engineering">Engineering</button>
+    </div>
+    <button class="btn-demo" id="demo-btn"><span class="dot"></span>Live demo</button>
+    <button class="btn-present" id="present-btn" title="Presentation mode — clean, cinematic view for demonstrations">Present</button>
+  </div>
+</header>
+
+<section id="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow"><span class="dot"></span>AUTONOMOUS IRRIGATION INTELLIGENCE</div>
+      <h1 class="hero-title">A living <em>digital twin</em><br>of a smarter orchard.</h1>
+      <p class="hero-sub">Soil sensors watch the ground. A controller decides when water is needed. Pumps and valves respond. You can see the whole loop happen, and open it from your phone from anywhere.</p>
+      <div class="hero-actions">
+        <button class="hbtn primary" id="hero-explore">Explore the system</button>
+        <button class="hbtn ghost" id="hero-demo">Watch live demo</button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <canvas id="hero-canvas"></canvas>
+      <div class="hero-tag"><span class="dot"></span>Simulated orchard, updating in real time</div>
+    </div>
+  </div>
+</section>
+
+<button class="present-exit hidden" id="present-exit">Exit presentation ×</button>
+
+<div id="app" style="display:none;">
+
+<!-- ============ EXPLORE (3D) ============ -->
+<div class="view active" id="view-explore">
+  <div class="stage-wrap">
+    <div class="stage-loading" id="stage-loading"><div class="spin"></div>Building the orchard…</div>
+    <canvas id="stage3d"></canvas>
+
+    <div class="status-bar" id="status-bar"></div>
+    <button class="explain-btn" id="explain-btn">Explain system</button>
+    <div class="explain-caption hidden" id="explain-caption"></div>
+    <div class="story-banner hidden" id="story-banner"><button class="sb-close" id="story-close">×</button><div class="sb-eyebrow" id="story-eyebrow">Live demo</div><div id="story-text"></div></div>
+
+    <div class="inspector hidden" id="inspector"></div>
+    <div class="decision-panel hidden" id="decision-panel"></div>
+
+    <div class="cam-toolbar" id="cam-toolbar">
+      <button data-cam="overview" class="active">Overview</button>
+      <button data-cam="water">Water</button>
+      <button data-cam="zones">Zones</button>
+      <button data-cam="pump">Pump</button>
+      <button data-cam="controller">Control</button>
+      <button data-cam="root">Root view</button>
+    </div>
+    <button class="follow-water-btn" id="follow-water-btn">Follow the water</button>
+    <div class="zoom-toolbar">
+      <button id="zoom-in">+</button>
+      <button id="zoom-out">−</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HOW IT WORKS ============ -->
+<div class="view" id="view-how">
+  <div class="page">
+    <div class="page-head">
+      <div class="page-eyebrow">How Verdant works</div>
+      <h2 class="page-title">Sense. Decide. Act. Watch.</h2>
+      <p class="page-sub">Five steps repeat continuously, day and night. Click one to see it highlighted in the orchard, or step through the whole loop with Explain system.</p>
+    </div>
+    <div class="steps5" id="steps5"></div>
+
+    <div class="page-head">
+      <div class="page-eyebrow">System architecture</div>
+      <h2 class="page-title">From soil to smartphone</h2>
+      <p class="page-sub">Every reading and every command travels the same path. Click a component to focus it in the 3D orchard.</p>
+    </div>
+    <div class="arch-diagram" id="arch-diagram"></div>
+
+    <div class="page-head">
+      <div class="page-eyebrow">The equipment</div>
+      <h2 class="page-title">What each part does</h2>
+    </div>
+    <div class="glossary" id="glossary"></div>
+  </div>
+</div>
+
+<!-- ============ CONTROL ============ -->
+<div class="view" id="view-control">
+  <div class="page">
+    <div class="page-head">
+      <div class="page-eyebrow">Control</div>
+      <h2 class="page-title">Monitor and irrigate remotely</h2>
+      <p class="page-sub">This is the same app an orchard owner would carry. Open a zone and press irrigate — watch the command travel to the field.</p>
+    </div>
+    <div class="control-layout">
+      <div class="phone-shell">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-statusrow"><span id="ph-clock">06:00</span><span>VERDANT</span><span id="ph-conn">●</span></div>
+          <div class="phone-body" id="phone-body">
+            <div id="pane-home"></div>
+            <div id="pane-orchard" style="display:none;">
+              <div class="mini3d"><canvas id="mini3d-canvas"></canvas></div>
+              <div class="ph-sectitle">Selected zone</div>
+              <div id="pane-orchard-detail"></div>
+            </div>
+            <div id="pane-automation" style="display:none;"></div>
+            <div id="pane-activity" style="display:none;"></div>
+            <div id="pane-system" style="display:none;"></div>
+          </div>
+          <div class="phone-tabs" id="phone-tabs">
+            <button data-pane="home" class="active">Home</button>
+            <button data-pane="orchard">Orchard</button>
+            <button data-pane="automation">Rules</button>
+            <button data-pane="activity">Activity</button>
+            <button data-pane="system">System</button>
+          </div>
+        </div>
+      </div>
+      <div class="control-panel">
+        <div class="panel-card">
+          <h3>Automation rule</h3>
+          <div class="pc-sub">Plain-language logic — the same rule the controller runs every second.</div>
+          <div class="rule-flow" id="rule-flow"></div>
+          <button class="advanced-toggle" id="adv-toggle">Show advanced parameters</button>
+          <div class="advanced-body" id="adv-body"></div>
+        </div>
+        <div class="panel-card eng-only">
+          <h3>Manual override</h3>
+          <div class="pc-sub">Switch to manual mode to operate the pump and valves directly.</div>
+          <div class="mode-segment" id="mode-segment">
+            <button data-mode="AUTO" class="active">Auto</button>
+            <button data-mode="SMART">Smart</button>
+            <button data-mode="MANUAL">Manual</button>
+          </div>
+          <div id="manual-list"></div>
+        </div>
+        <div class="panel-card">
+          <h3>Test system</h3>
+          <div class="pc-sub">Simulate a fault and watch the safety logic respond.</div>
+          <div class="test-list" id="test-list"></div>
+          <div class="diag-chain hidden" id="diag-chain"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DATA ============ -->
+<div class="view" id="view-data">
+  <div class="page">
+    <div class="page-head">
+      <div class="page-eyebrow">Data</div>
+      <h2 class="page-title">What the system has been doing</h2>
+      <p class="page-sub">A running record of every decision, and the telemetry behind it.</p>
+    </div>
+    <div class="data-topline">
+      <div class="range-seg" id="range-seg">
+        <button data-range="1440" class="active">24 hours</button>
+        <button data-range="10080">7 days</button>
+        <button data-range="43200">30 days</button>
+      </div>
+    </div>
+    <div class="timeline" id="timeline"></div>
+    <div class="charts-grid" id="charts-grid">
+      <div class="chart-card"><h4>Soil moisture — Zone 3 · Cherry</h4><div class="cc-sub">Percent, dashed line marks target</div><canvas id="chart-moist"></canvas></div>
+      <div class="chart-card"><h4>Water tank level</h4><div class="cc-sub">Percent of capacity</div><canvas id="chart-tank"></canvas></div>
+      <div class="chart-card eng-only"><h4>Pump flow</h4><div class="cc-sub">Litres per minute</div><canvas id="chart-flow"></canvas></div>
+      <div class="chart-card eng-only"><h4>Air temperature</h4><div class="cc-sub">Degrees Celsius</div><canvas id="chart-temp"></canvas></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /#app -->
+
+<footer>VERDANT is a digital simulation. Sensor and actuator values are simulated and are not connected to physical hardware.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+"use strict";
+/* ==================================================================
+   PART A — ENGINE  (state, tick loop, irrigation logic)
+   ================================================================== */
+const ZONE_DEFS = [
+  {id:1, name:'Zone 1', crop:'Apple', color:0x7C9A4E, treeColor:0x6f8f47},
+  {id:2, name:'Zone 2', crop:'Pear',  color:0x8FAE5E, treeColor:0x7fa050},
+  {id:3, name:'Zone 3', crop:'Cherry',color:0xA3684C, treeColor:0x8a5540},
+  {id:4, name:'Zone 4', crop:'Vegetables', color:0x5C8A72, treeColor:0x4f7a63},
+];
+
+function freshState(){
+  return {
+    simSeconds: 6*3600, speed:1, dayJumpUntil:0,
+    weather:{condition:'SUNNY', temp:27.4, humidity:63, rain:0, wind:8},
+    tank:{capacity:5000, current:4000},
+    pump:{running:false, rpm:0, flow:0, pressure:0, power:0, current:0, voltage:230, opTimeSec:0, noFlowTimerSec:0},
+    mode:'AUTO',
+    thresholds:{min:30, max:50, maxTimeMin:20, tankSafety:10},
+    stops:{tank:true, rain:true, flow:true, fault:true},
+    zones: ZONE_DEFS.map((z,i)=>({...z, moisture:[55,27,48,62][i], valve:false, runningSince:null, delivered:0})),
+    logs:[], history:{t:[],moist:[[],[],[],[]],tank:[],temp:[],hum:[],flow:[]},
+    faults:{pumpFailure:false, valveFailure:null, blockage:false, noFlow:false, overcurrent:false, soilDisconnected:null, internetDown:false, rainForced:false},
+    connection:{online:true, lastSyncSec:0},
+    selected:null, storyRunning:false,
+    signalPulses:[],
+  };
+}
+let state = freshState();
+
+function fmtClock(sec){
+  const day = Math.floor(sec/86400)+1;
+  const h = Math.floor((sec%86400)/3600), m=Math.floor((sec%3600)/60), s=Math.floor(sec%60);
+  return {day,h,m,s,hm:`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`, hms:`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`};
+}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function tankPct(){return state.tank.current/state.tank.capacity*100;}
+function moistLabel(v){
+  if(v<20) return {label:'Very dry', tone:'bad'};
+  if(v<35) return {label:'Dry', tone:'warn'};
+  if(v<60) return {label:'Optimal', tone:'good'};
+  if(v<80) return {label:'Wet', tone:'good'};
+  return {label:'Saturated', tone:'warn'};
+}
+function log(msg, level){
+  state.logs.push({t: fmtClock(state.simSeconds).hms, msg, level: level||'info'});
+  if(state.logs.length>500) state.logs.shift();
+}
+function pulseSignal(zoneId){
+  state.signalPulses.push({zoneId, start: Date.now()});
+  if(state.signalPulses.length>6) state.signalPulses.shift();
+}
+function openValve(z, source){
+  if(state.faults.valveFailure===z.id) return;
+  z.valve = true; z.runningSince = state.simSeconds;
+  pulseSignal(z.id);
+  log(`${z.name} irrigation started${source==='auto'?' — automation':''}. Valve opened.`, 'ok');
+}
+function closeValve(z, reason){
+  z.valve = false; z.runningSince = null;
+  log(`${z.name} valve closed — ${reason}.`, 'info');
+}
+
+let lastMs = performance.now();
+function tickFrame(){
+  const now = performance.now();
+  let realDt = (now-lastMs)/1000; lastMs = now;
+  if(realDt>0.5) realDt = 0.5;
+  let speed = state.speed;
+  if(state.dayJumpUntil > now) speed = 2200;
+  if(!state.storyPaused) advance(realDt*speed);
+  onTick();
+  requestAnimationFrame(tickFrame);
+}
+
+function advance(dt){
+  if(dt<=0) return;
+  state.simSeconds += dt;
+  state.connection.online = !state.faults.internetDown;
+
+  const targets = {
+    SUNNY:{temp:29,hum:48,rain:0,wind:7}, CLOUDY:{temp:24,hum:58,rain:0,wind:10},
+    RAIN:{temp:19,hum:82,rain:0.6,wind:14}, HEAVY_RAIN:{temp:17,hum:92,rain:1,wind:22},
+    HOT:{temp:36,hum:30,rain:0,wind:6}, COLD:{temp:9,hum:55,rain:0,wind:12},
+  }[state.weather.condition];
+  const wr = dt*0.04;
+  state.weather.temp += (targets.temp-state.weather.temp)*wr + (Math.random()-0.5)*0.03;
+  state.weather.humidity = clamp(state.weather.humidity + (targets.hum-state.weather.humidity)*wr + (Math.random()-0.5)*0.08,10,99);
+  state.weather.rain += (targets.rain-state.weather.rain)*wr*2;
+  state.weather.wind += (targets.wind-state.weather.wind)*wr;
+  const isRaining = state.faults.rainForced || state.weather.rain>0.35;
+
+  state.zones.forEach(z=>{
+    const valveFaulty = state.faults.valveFailure===z.id;
+    if(state.mode==='AUTO' || state.mode==='SMART'){
+      const rainBlocks = state.stops.rain && state.mode==='SMART' && isRaining;
+      const tankOk = !state.stops.tank || tankPct() > state.thresholds.tankSafety;
+      const canRun = state.connection.online && tankOk && !rainBlocks && !valveFaulty;
+      if(!z.valve && z.moisture < state.thresholds.min && canRun){
+        openValve(z,'auto');
+      } else if(z.valve){
+        const ranMin = (state.simSeconds - z.runningSince)/60;
+        if(z.moisture >= state.thresholds.max) closeValve(z,'target moisture reached');
+        else if(ranMin >= state.thresholds.maxTimeMin) closeValve(z,'maximum irrigation time reached');
+        else if(!canRun) closeValve(z, rainBlocks?'rain detected, suspended':'unsafe condition');
+      }
+    }
+  });
+
+  const anyOpen = state.zones.some(z=>z.valve);
+  const pumpShouldRun = anyOpen && !state.faults.pumpFailure;
+  if(pumpShouldRun && !state.pump.running){ state.pump.running=true; log('Pump started.','ok'); }
+  else if(!pumpShouldRun && state.pump.running){ state.pump.running=false; log('Pump stopped.','ok'); }
+
+  const openCount = state.zones.filter(z=>z.valve).length;
+  if(state.pump.running){
+    state.pump.opTimeSec += dt;
+    state.pump.rpm += (2850-state.pump.rpm)*dt*0.6;
+    let flowPerZone = 6.2; if(state.faults.blockage) flowPerZone*=0.35;
+    let flow = state.faults.noFlow?0:flowPerZone*openCount;
+    if(tankPct()<=0) flow=0;
+    state.pump.flow += (flow-state.pump.flow)*dt*0.8;
+    state.pump.pressure = state.faults.noFlow?0:clamp(2.6-openCount*0.15-(state.faults.blockage?0.8:0),0.3,3.2);
+    let current = 2.6+openCount*0.35; if(state.faults.overcurrent) current*=2.6;
+    state.pump.current += (current-state.pump.current)*dt*0.8;
+    state.pump.power = Math.round(state.pump.voltage*state.pump.current);
+
+    if(state.pump.flow<0.5){
+      state.pump.noFlowTimerSec += dt;
+      if(state.pump.noFlowTimerSec>6 && !state._noFlowAlerted){
+        state._noFlowAlerted=true;
+        log('CRITICAL: no water flow detected while pump is running.','crit');
+        setDiagChain(['PUMP RUNNING','FLOW = 0 L/MIN','FLOW SENSOR CONFIRMED','SAFETY WATCHDOG TRIGGERED']);
+      }
+      if(state.pump.noFlowTimerSec>12){
+        state.zones.forEach(z=>{ if(z.valve){ closeValve(z,'safety shutdown, no flow'); } });
+        setDiagChain(['PUMP RUNNING','FLOW = 0 L/MIN','FLOW SENSOR CONFIRMED','SAFETY WATCHDOG TRIGGERED','PUMP SHUTDOWN','ZONE CLOSED','ALERT SENT TO PHONE']);
+        log('Pump shut down by no-flow safety interlock.','crit');
+      }
+    } else { state.pump.noFlowTimerSec=0; state._noFlowAlerted=false; }
+
+    if(state.faults.overcurrent && !state._ocAlerted){
+      state._ocAlerted=true;
+      setDiagChain(['PUMP RUNNING','CURRENT ABOVE RATED LIMIT','OVERCURRENT PROTECTION TRIGGERED','PUMP SHUTDOWN','ALERT SENT TO PHONE']);
+      log('CRITICAL: pump current outside expected operating range.','crit');
+    }
+  } else {
+    state.pump.rpm += (0-state.pump.rpm)*dt*0.8;
+    state.pump.flow += (0-state.pump.flow)*dt*0.8;
+    state.pump.pressure += (0-state.pump.pressure)*dt*0.8;
+    state.pump.current += (0-state.pump.current)*dt*0.8;
+    state.pump.power = Math.round(state.pump.voltage*state.pump.current);
+    state.pump.noFlowTimerSec=0; state._ocAlerted=false;
+  }
+
+  const consumedL = state.pump.running? state.pump.flow/60*dt : 0;
+  state.tank.current = clamp(state.tank.current-consumedL,0,state.tank.capacity);
+  if(tankPct()<15 && !state._lowAlerted){ state._lowAlerted=true; log('Water tank is below 15%.','warn'); }
+  if(tankPct()>=20) state._lowAlerted=false;
+
+  state.zones.forEach(z=>{
+    if(state.faults.soilDisconnected===z.id) return;
+    const evap = (0.15+(state.weather.temp-20)*0.006-(state.weather.humidity-50)*0.002)*dt/60;
+    if(z.valve && state.pump.running && state.pump.flow>0.5){
+      const rate = 0.9*dt/60; z.moisture += rate; z.delivered += state.pump.flow/openCount/60*dt;
+    } else {
+      z.moisture -= Math.max(evap,0)*(isRaining?0.2:1);
+      if(isRaining) z.moisture += 0.35*dt/60*state.weather.rain;
+    }
+    z.moisture = clamp(z.moisture,0,100);
+  });
+
+  if(!state._lastSample || state.simSeconds-state._lastSample>=60){
+    state._lastSample = state.simSeconds;
+    state.history.t.push(state.simSeconds);
+    state.zones.forEach((z,i)=>state.history.moist[i].push(z.moisture));
+    state.history.tank.push(tankPct());
+    state.history.temp.push(state.weather.temp);
+    state.history.hum.push(state.weather.humidity);
+    state.history.flow.push(state.pump.flow);
+    const cap=43200*2;
+    if(state.history.t.length>cap){
+      state.history.t.shift(); state.history.tank.shift(); state.history.temp.shift(); state.history.hum.shift(); state.history.flow.shift();
+      state.zones.forEach((z,i)=>state.history.moist[i].shift());
+    }
+  }
+  if(!state._lastSync || state.simSeconds-state._lastSync>25){ state._lastSync=state.simSeconds; state.connection.lastSyncSec=state.simSeconds; }
+}
+
+function setDiagChain(steps){
+  const el = document.getElementById('diag-chain');
+  if(!el) return;
+  el.classList.remove('hidden');
+  el.innerHTML = `<div class="chain-title">Diagnostic chain</div>` + steps.map((s,i)=>`<div class="chain-step">${s}</div>${i<steps.length-1?'<div class="chain-arrow">↓</div>':''}`).join('');
+}
+
+function decisionChainFor(z){
+  const steps = [];
+  steps.push([`ZONE 0${z.id} — ${z.crop.toUpperCase()}`,'info']);
+  steps.push([`MOISTURE ${z.moisture.toFixed(1)}%`,'info']);
+  const belowMin = z.moisture < state.thresholds.min;
+  steps.push([`BELOW MINIMUM (${state.thresholds.min}%)? ${belowMin?'YES':'NO'}`, belowMin?'ok':'bad']);
+  if(!belowMin){ steps.push(['DECISION — NO ACTION NEEDED','final']); return steps; }
+  const isRaining = state.faults.rainForced || state.weather.rain>0.35;
+  const rainBlocks = state.stops.rain && state.mode==='SMART' && isRaining;
+  steps.push([`RAIN DETECTED? ${isRaining?'YES':'NO'}`, isRaining?'bad':'ok']);
+  const tankOk = !state.stops.tank || tankPct() > state.thresholds.tankSafety;
+  steps.push([`TANK SAFE? ${tankOk?'YES':'NO'}`, tankOk?'ok':'bad']);
+  steps.push([`CONNECTION? ${state.connection.online?'ONLINE':'OFFLINE'}`, state.connection.online?'ok':'bad']);
+  const valveFaulty = state.faults.valveFailure===z.id;
+  steps.push([`FAULT? ${valveFaulty?'VALVE V-0'+z.id:'NONE'}`, valveFaulty?'bad':'ok']);
+  const modeOk = state.mode==='AUTO'||state.mode==='SMART';
+  steps.push([`MODE? ${state.mode}`, modeOk?'ok':'bad']);
+  const canRun = state.connection.online && tankOk && !rainBlocks && !valveFaulty && modeOk;
+  if(canRun) steps.push(['DECISION — IRRIGATE','final']);
+  else steps.push(['DECISION — HOLD','final']);
+  return steps;
+}
+function showDecisionChain(id){
+  const z = state.zones.find(z=>z.id===id); if(!z) return;
+  const steps = decisionChainFor(z);
+  const el = document.getElementById('decision-panel');
+  el.innerHTML = `<button class="dp-close" id="dp-close">×</button>
+    <div class="dp-title">Decision engine — Zone 0${z.id}</div>` +
+    steps.map((s,i)=>`<div class="chain-step ${s[1]}">${s[0]}</div>${i<steps.length-1?'<div class="chain-arrow">↓</div>':''}`).join('');
+  el.classList.remove('hidden');
+  document.getElementById('dp-close').onclick = hideDecisionChain;
+}
+function hideDecisionChain(){ document.getElementById('decision-panel').classList.add('hidden'); }
+
+/* JS_MARKER_ENGINE */
+
+/* ==================================================================
+   PART B — 3D ORCHARD  (Three.js digital twin)
+   ================================================================== */
+const LAYOUT3D = {
+  spineX:-11, tankZ:-6, pumpZ:0, ctrlZ:5, eqX:-16,
+  zoneZ:[-9,-3,3,9], fieldX0:-7, fieldX1:14, sensorX:12,
+};
+function zPointFor(kind,id){
+  if(kind==='tank') return new THREE.Vector3(LAYOUT3D.eqX, 2.6, LAYOUT3D.tankZ);
+  if(kind==='pump') return new THREE.Vector3(LAYOUT3D.eqX, 1.6, LAYOUT3D.pumpZ);
+  if(kind==='controller') return new THREE.Vector3(LAYOUT3D.eqX, 1.3, LAYOUT3D.ctrlZ);
+  if(kind==='valve') return new THREE.Vector3(LAYOUT3D.spineX+0.6, 0.7, LAYOUT3D.zoneZ[id-1]);
+  if(kind==='zone') return new THREE.Vector3(LAYOUT3D.sensorX, 0.9, LAYOUT3D.zoneZ[id-1]);
+  return new THREE.Vector3(0,1,0);
+}
+
+function moistColor(m){
+  // continuous gradient: dry/dusty -> rich dark loam -> saturated blue-dark
+  const stops = [
+    {t:0,   c:new THREE.Color(0xC9A96E)},
+    {t:0.28,c:new THREE.Color(0xB8955E)},
+    {t:0.55,c:new THREE.Color(0x8A6B49)},
+    {t:0.78,c:new THREE.Color(0x5E5236)},
+    {t:1.0, c:new THREE.Color(0x3C3826)},
+  ];
+  const t = clamp(m/100,0,1);
+  for(let i=0;i<stops.length-1;i++){
+    if(t>=stops[i].t && t<=stops[i+1].t){
+      const lt = (t-stops[i].t)/(stops[i+1].t-stops[i].t);
+      return stops[i].c.clone().lerp(stops[i+1].c, lt);
+    }
+  }
+  return stops[stops.length-1].c.clone();
+}
+
+function makeLabelTexture(lines, opts){
+  opts = opts||{};
+  const w=256,h=104;
+  const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle = opts.bg || '#EDE6CF';
+  ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle = opts.border || '#B6A780';
+  ctx.lineWidth = 5;
+  ctx.strokeRect(3,3,w-6,h-6);
+  ctx.textAlign='center';
+  ctx.fillStyle = opts.fg || '#231F19';
+  ctx.font = '700 24px monospace';
+  ctx.fillText(lines[0]||'', w/2, 38);
+  ctx.fillStyle = opts.fg2 || '#63755A';
+  ctx.font = '600 15px monospace';
+  ctx.fillText(lines[1]||'', w/2, 62);
+  if(lines[2]){
+    ctx.fillStyle = opts.fg3 || '#9C9480';
+    ctx.font = '500 13px monospace';
+    ctx.fillText(lines[2], w/2, 84);
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.anisotropy = 4;
+  return tex;
+}
+
+function buildOrchard(opts){
+  opts = opts||{};
+  const interactive = !!opts.interactive;
+  const scene = new THREE.Scene();
+  scene.background = null;
+  scene.fog = new THREE.Fog(0xE4DBC0, 24, 60);
+
+  // ---- lighting: sun + hemisphere fill + soft counter fill ----
+  const hemi = new THREE.HemisphereLight(0xFCF6E4, 0x6E5A3C, 0.85);
+  scene.add(hemi);
+  const sun = new THREE.DirectionalLight(0xFFF3D6, 1.15);
+  sun.position.set(14,22,10);
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0xCFE0DE, 0.28);
+  fill.position.set(-12,9,-8);
+  scene.add(fill);
+  if(interactive){
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(1024,1024);
+    sun.shadow.camera.left=-24; sun.shadow.camera.right=24;
+    sun.shadow.camera.top=20; sun.shadow.camera.bottom=-20;
+    sun.shadow.camera.near=2; sun.shadow.camera.far=50;
+    sun.shadow.bias=-0.0025;
+  }
+
+  // ---- terrain with subtle patchy vertex color ----
+  const terrainGeo = new THREE.PlaneGeometry(50,32,50,32);
+  terrainGeo.rotateX(-Math.PI/2);
+  const posAttr = terrainGeo.attributes.position;
+  const colors = [];
+  const baseCol = new THREE.Color(0xDED2A8), varCol = new THREE.Color(0xC9BC8E);
+  for(let i=0;i<posAttr.count;i++){
+    const x=posAttr.getX(i), z=posAttr.getZ(i);
+    const h = Math.sin(x*0.18)*0.18 + Math.cos(z*0.22)*0.14 + (Math.random()-0.5)*0.05;
+    posAttr.setY(i,h);
+    const n = (Math.sin(x*0.7+z*0.4)*0.5+0.5)*0.5 + Math.random()*0.2;
+    const c = baseCol.clone().lerp(varCol, clamp(n,0,1));
+    colors.push(c.r,c.g,c.b);
+  }
+  terrainGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors,3));
+  terrainGeo.computeVertexNormals();
+  const terrainMat = new THREE.MeshStandardMaterial({vertexColors:true, roughness:1, metalness:0});
+  const terrain = new THREE.Mesh(terrainGeo, terrainMat);
+  terrain.position.x = 3;
+  terrain.receiveShadow = true;
+  scene.add(terrain);
+
+  // path near equipment
+  const pathGeo = new THREE.PlaneGeometry(3.2,22);
+  pathGeo.rotateX(-Math.PI/2);
+  const path = new THREE.Mesh(pathGeo, new THREE.MeshStandardMaterial({color:0xD2C39A,roughness:1}));
+  path.position.set(LAYOUT3D.spineX-2.4,0.032,0);
+  path.receiveShadow = true;
+  scene.add(path);
+
+  // perimeter fence (subtle, low-poly)
+  const fenceGroup = new THREE.Group();
+  const postGeo = new THREE.CylinderGeometry(0.045,0.05,0.62,6);
+  const postMat = new THREE.MeshStandardMaterial({color:0x7A6B4A, roughness:1});
+  const railGeo = new THREE.BoxGeometry(1.0,0.045,0.045);
+  for(let n=0;n<13;n++){
+    const x = LAYOUT3D.fieldX0-1.6 + n*1.35;
+    const post = new THREE.Mesh(postGeo, postMat);
+    post.position.set(x,0.31,-13.4);
+    fenceGroup.add(post);
+    if(n>0){
+      const rail = new THREE.Mesh(railGeo, postMat);
+      rail.position.set(x-0.675,0.42,-13.4);
+      fenceGroup.add(rail);
+    }
+  }
+  scene.add(fenceGroup);
+
+  // ---- soil beds (one per zone, color = moisture, with lip border) ----
+  const soilBeds = [], soilLips = [];
+  ZONE_DEFS.forEach((z,i)=>{
+    const w = LAYOUT3D.fieldX1-LAYOUT3D.fieldX0+2, d=4.4;
+    const g = new THREE.PlaneGeometry(w,d,10,4);
+    g.rotateX(-Math.PI/2);
+    const m = new THREE.MeshStandardMaterial({color:0x8A6B49, roughness:1, side:THREE.DoubleSide});
+    const mesh = new THREE.Mesh(g,m);
+    mesh.position.set((LAYOUT3D.fieldX0+LAYOUT3D.fieldX1)/2, 0.06, LAYOUT3D.zoneZ[i]);
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+    soilBeds.push(mesh);
+    const lipGeo = new THREE.BoxGeometry(w+0.15,0.09,d+0.15);
+    const lip = new THREE.Mesh(lipGeo, new THREE.MeshStandardMaterial({color:0x6b5636, roughness:1}));
+    lip.position.set(mesh.position.x, -0.02, mesh.position.z);
+    scene.add(lip);
+    soilLips.push(lip);
+  });
+
+  // ---- trees: two-layer canopy + occasional fruit for realism ----
+  const trunkGeo = new THREE.CylinderGeometry(0.09,0.14,1.15,7);
+  const canopyLoGeo = new THREE.IcosahedronGeometry(0.6,0);
+  const canopyHiGeo = new THREE.IcosahedronGeometry(0.4,0);
+  const fruitGeo = new THREE.SphereGeometry(0.055,6,6);
+  const rowGeo = new THREE.BoxGeometry(1.0,0.26,0.46);
+  const cropGeo = new THREE.ConeGeometry(0.09,0.24,5);
+  const treeGroups = [];
+  const N = 11;
+  const fruitColorFor = {1:0xB5473A, 2:0xC9B559, 3:0x7C2B2B, 4:0xD8C05A};
+  ZONE_DEFS.forEach((z,i)=>{
+    const isVeg = z.id===4;
+    const zc = LAYOUT3D.zoneZ[i];
+    if(!isVeg){
+      const trunkMat = new THREE.MeshStandardMaterial({color:0x6b5636, roughness:1});
+      const canLoMat = new THREE.MeshStandardMaterial({color:z.treeColor, roughness:0.95, flatShading:true});
+      const canHiMat = new THREE.MeshStandardMaterial({color:z.treeColor, roughness:0.85, flatShading:true, emissive:0x0a0f06, emissiveIntensity:0.15});
+      const fruitMat = new THREE.MeshStandardMaterial({color:fruitColorFor[z.id]||0xB5473A, roughness:0.5});
+      const trunks = new THREE.InstancedMesh(trunkGeo, trunkMat, N);
+      const canLo = new THREE.InstancedMesh(canopyLoGeo, canLoMat, N);
+      const canHi = new THREE.InstancedMesh(canopyHiGeo, canHiMat, N);
+      const fruit = new THREE.InstancedMesh(fruitGeo, fruitMat, N*3);
+      trunks.castShadow = interactive; canLo.castShadow = interactive; canHi.castShadow = interactive;
+      const phases=[];
+      const m4 = new THREE.Matrix4();
+      let fIdx=0;
+      for(let n=0;n<N;n++){
+        const x = LAYOUT3D.fieldX0+0.8 + n*((LAYOUT3D.fieldX1-LAYOUT3D.fieldX0-1.6)/(N-1));
+        const jz = zc + Math.sin(n*12.9)*0.45;
+        const hVar = 0.9 + (Math.abs(Math.sin(n*4.4))*0.2);
+        phases.push({x, z:jz, ph:Math.random()*Math.PI*2, hVar});
+        m4.makeScale(1,hVar,1);
+        m4.setPosition(x,0.55*hVar,jz);
+        trunks.setMatrixAt(n,m4);
+        m4.identity();
+        m4.setPosition(x,1.22*hVar,jz);
+        canLo.setMatrixAt(n,m4);
+        m4.makeRotationY(n*1.3);
+        m4.setPosition(x+0.18,1.5*hVar,jz+0.1);
+        canHi.setMatrixAt(n,m4);
+        for(let fi=0;fi<3;fi++){
+          const fa = fi*2.1+n;
+          m4.identity();
+          m4.setPosition(x+Math.cos(fa)*0.5, 1.2*hVar+Math.sin(fa*1.7)*0.35, jz+Math.sin(fa)*0.45);
+          fruit.setMatrixAt(fIdx++, m4);
+        }
+      }
+      trunks.instanceMatrix.needsUpdate=true;
+      canLo.instanceMatrix.needsUpdate=true;
+      canHi.instanceMatrix.needsUpdate=true;
+      fruit.instanceMatrix.needsUpdate=true;
+      scene.add(trunks,canLo,canHi,fruit);
+      treeGroups.push({foliage:canLo, foliage2:canHi, phases});
+    } else {
+      const rowMat = new THREE.MeshStandardMaterial({color:z.treeColor, roughness:1});
+      const cropMat = new THREE.MeshStandardMaterial({color:0x6E8A50, roughness:0.85});
+      const rows = new THREE.InstancedMesh(rowGeo, rowMat, 8);
+      const crops = new THREE.InstancedMesh(cropGeo, cropMat, 8*5);
+      rows.castShadow = interactive;
+      const m4 = new THREE.Matrix4();
+      let cIdx=0;
+      for(let n=0;n<8;n++){
+        const x = LAYOUT3D.fieldX0+1 + n*((LAYOUT3D.fieldX1-LAYOUT3D.fieldX0-2)/7);
+        m4.makeTranslation(x,0.14,zc);
+        rows.setMatrixAt(n,m4);
+        for(let ci=0;ci<5;ci++){
+          m4.identity();
+          m4.setPosition(x-0.4+ci*0.2, 0.26, zc+(Math.random()-0.5)*0.3);
+          crops.setMatrixAt(cIdx++, m4);
+        }
+      }
+      rows.instanceMatrix.needsUpdate=true;
+      crops.instanceMatrix.needsUpdate=true;
+      scene.add(rows,crops);
+    }
+    // physical zone signage (post + label plate)
+    const signPostGeo = new THREE.CylinderGeometry(0.025,0.03,0.55,6);
+    const signPost = new THREE.Mesh(signPostGeo, new THREE.MeshStandardMaterial({color:0x5c5340,roughness:1}));
+    signPost.position.set(LAYOUT3D.fieldX0-0.7,0.28,zc);
+    scene.add(signPost);
+    const signTex = makeLabelTexture(['ZONE 0'+z.id, z.crop.toUpperCase()]);
+    const sign = new THREE.Sprite(new THREE.SpriteMaterial({map:signTex, transparent:true}));
+    sign.scale.set(0.9,0.37,1);
+    sign.position.set(LAYOUT3D.fieldX0-0.7,0.72,zc);
+    scene.add(sign);
+  });
+
+  // ---- pipes ----
+  const pipeMat = new THREE.MeshStandardMaterial({color:0xB6A780, roughness:0.55, metalness:0.2});
+  function pipeBetween(a,b,r,mat){
+    const dir = new THREE.Vector3().subVectors(b,a);
+    const len = dir.length();
+    const geo = new THREE.CylinderGeometry(r,r,len,8);
+    const mesh = new THREE.Mesh(geo, mat||pipeMat);
+    mesh.position.copy(a).addScaledVector(dir,0.5);
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.clone().normalize());
+    mesh.castShadow = interactive;
+    scene.add(mesh);
+    return mesh;
+  }
+  // low sagging control cable between two points (electrical wiring)
+  const cableMat = new THREE.MeshStandardMaterial({color:0x2E2B23, roughness:0.8});
+  function cableBetween(a,b){
+    const mid = a.clone().lerp(b,0.5); mid.y = Math.max(a.y,b.y)+0.06;
+    const curve = new THREE.QuadraticBezierCurve3(a,mid,b);
+    const geo = new THREE.TubeGeometry(curve,10,0.014,5,false);
+    const mesh = new THREE.Mesh(geo, cableMat);
+    scene.add(mesh);
+    return mesh;
+  }
+
+  const spineTop = new THREE.Vector3(LAYOUT3D.spineX,0.5,-11);
+  const spineBot = new THREE.Vector3(LAYOUT3D.spineX,0.5,11);
+  const spineMat = pipeMat.clone();
+  const feederMat = pipeMat.clone();
+  pipeBetween(spineTop, spineBot, 0.11, spineMat);
+  pipeBetween(new THREE.Vector3(LAYOUT3D.eqX,0.5,LAYOUT3D.pumpZ), new THREE.Vector3(LAYOUT3D.spineX,0.5,LAYOUT3D.pumpZ), 0.11, feederMat);
+  pipeBetween(new THREE.Vector3(LAYOUT3D.eqX,2.0,LAYOUT3D.tankZ), new THREE.Vector3(LAYOUT3D.eqX,0.6,LAYOUT3D.pumpZ), 0.09);
+  // electrical backbone: controller -> pump, controller -> tank vicinity
+  cableBetween(new THREE.Vector3(LAYOUT3D.eqX+0.35,1.0,LAYOUT3D.ctrlZ), new THREE.Vector3(LAYOUT3D.eqX+0.55,0.8,LAYOUT3D.pumpZ));
+
+  const branchPipes = [], valveMeshes = [], sensorMeshes = [], flowDots = [], pickMeshes = [], rootUnderground = [], surfaceEmitters = [];
+  ZONE_DEFS.forEach((z,i)=>{
+    const zc = LAYOUT3D.zoneZ[i];
+    const a = new THREE.Vector3(LAYOUT3D.spineX,0.42,zc), b = new THREE.Vector3(LAYOUT3D.sensorX+0.6,0.42,zc);
+    const branchMat = pipeMat.clone();
+    branchPipes.push(pipeBetween(a,b,0.07,branchMat));
+
+    // ---- physical gate-valve assembly with utility box ----
+    const valveGroup = new THREE.Group();
+    valveGroup.position.set(LAYOUT3D.spineX+0.6,0,zc);
+    const vBody = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.34,10), new THREE.MeshStandardMaterial({color:0x8A8267,metalness:0.35,roughness:0.5}));
+    vBody.rotation.z = Math.PI/2;
+    vBody.position.y = 0.42;
+    const vWheelGroup = new THREE.Group();
+    vWheelGroup.position.set(0,0.62,0);
+    const vWheel = new THREE.Mesh(new THREE.TorusGeometry(0.13,0.02,6,12), new THREE.MeshStandardMaterial({color:0x374C30, metalness:0.3,roughness:0.6}));
+    vWheel.rotation.x = Math.PI/2;
+    vWheelGroup.add(vWheel);
+    const vBox = new THREE.Mesh(new THREE.BoxGeometry(0.34,0.3,0.3), new THREE.MeshStandardMaterial({color:0x5C6B4E,roughness:0.8}));
+    vBox.position.set(0,0.16,0.32);
+    const vLed = new THREE.Mesh(new THREE.SphereGeometry(0.028,8,8), new THREE.MeshStandardMaterial({color:0xB6A780, emissive:0x000000}));
+    vLed.position.set(0,0.3,0.48);
+    vBody.userData = {kind:'valve', id:z.id};
+    vBox.userData = {kind:'valve', id:z.id};
+    valveGroup.add(vBody, vWheelGroup, vBox, vLed);
+    valveGroup.userData = {kind:'valve', id:z.id, wheel:vWheelGroup, led:vLed};
+    scene.add(valveGroup);
+    valveMeshes.push(valveGroup);
+    pickMeshes.push(vBody, vBox);
+    cableBetween(new THREE.Vector3(LAYOUT3D.eqX+0.35,0.9,LAYOUT3D.ctrlZ), new THREE.Vector3(LAYOUT3D.spineX+0.6,0.3,zc));
+
+    // ---- physical soil sensor: stake + enclosure + probe + LED ----
+    const sensGroup = new THREE.Group();
+    sensGroup.position.set(LAYOUT3D.sensorX,0,zc);
+    const stake = new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.03,0.62,6), new THREE.MeshStandardMaterial({color:0x6b6250}));
+    stake.position.y = 0.31;
+    const enclosure = new THREE.Mesh(new THREE.BoxGeometry(0.16,0.12,0.08), new THREE.MeshStandardMaterial({color:0xE6DDC4,roughness:0.7}));
+    enclosure.position.y = 0.66;
+    const sensLed = new THREE.Mesh(new THREE.SphereGeometry(0.02,6,6), new THREE.MeshStandardMaterial({color:0x3E6E86, emissive:0x1c3540}));
+    sensLed.position.set(0.06,0.66,0.045);
+    const probe = new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.22,5), new THREE.MeshStandardMaterial({color:0x2E2B23}));
+    probe.position.y = 0.0;
+    stake.userData = {kind:'zone', id:z.id};
+    enclosure.userData = {kind:'zone', id:z.id};
+    sensGroup.add(stake, enclosure, sensLed, probe);
+    sensGroup.userData = {kind:'zone', id:z.id, led:sensLed};
+    scene.add(sensGroup);
+    sensorMeshes.push(sensGroup);
+    pickMeshes.push(stake, enclosure);
+
+    // flow dots for this branch
+    const dotGeo = new THREE.SphereGeometry(0.08,8,8);
+    const dotMat = new THREE.MeshBasicMaterial({color:0x6FA0B8, transparent:true});
+    const dots = [];
+    for(let d=0;d<4;d++){
+      const dot = new THREE.Mesh(dotGeo,dotMat);
+      dot.visible=false;
+      scene.add(dot);
+      dots.push(dot);
+    }
+    flowDots.push({dots, a, b, branchMat});
+
+    // ---- underground root-zone: cut-line, roots, lateral drip pipe, wet bulb ----
+    const rootGroup = new THREE.Group();
+    rootGroup.position.set(0,0,zc);
+    // a couple of stylized root fans below tree positions (skip for veg zone, use crop roots instead)
+    const rootCount = z.id===4 ? 3 : 2;
+    const rootMat = new THREE.MeshStandardMaterial({color:0x5c4a33, roughness:1});
+    for(let r=0;r<rootCount;r++){
+      const rx = LAYOUT3D.fieldX0 + 2.5 + r*((LAYOUT3D.fieldX1-LAYOUT3D.fieldX0-5)/(rootCount-1||1));
+      for(let bi=0;bi<5;bi++){
+        const ang = -Math.PI/2 + (bi-2)*0.34 + (Math.random()-0.5)*0.08;
+        const len = 0.55 + Math.random()*0.35;
+        const rg = new THREE.CylinderGeometry(0.006,0.028,len,5);
+        const rm = new THREE.Mesh(rg, rootMat);
+        rm.position.set(rx + Math.cos(ang)*len*0.32, -Math.sin(-ang)*len*0.4 - 0.02, zc + (Math.random()-0.5)*0.5);
+        rm.rotation.z = ang + Math.PI/2;
+        rm.rotation.x = (Math.random()-0.5)*0.3;
+        scene.add(rm);
+      }
+    }
+    // lateral drip line at root depth
+    const uA = new THREE.Vector3(LAYOUT3D.fieldX0-0.5,-0.32,zc);
+    const uB = new THREE.Vector3(LAYOUT3D.fieldX1+0.5,-0.32,zc);
+    const uMat = pipeMat.clone();
+    pipeBetween(uA,uB,0.05,uMat);
+    const uDots=[];
+    for(let d=0;d<5;d++){
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(0.06,8,8), new THREE.MeshBasicMaterial({color:0x6FA0B8, transparent:true}));
+      dot.visible=false; scene.add(dot); uDots.push(dot);
+    }
+    // wet bulb — spreading moisture front around the drip line, scales with moisture
+    const wetBulb = new THREE.Mesh(new THREE.SphereGeometry(1,14,10), new THREE.MeshStandardMaterial({color:0x3E6E86, transparent:true, opacity:0.28, roughness:1}));
+    wetBulb.scale.set(1.6,0.32,1.1);
+    wetBulb.position.set((LAYOUT3D.fieldX0+LAYOUT3D.fieldX1)/2, -0.34, zc);
+    scene.add(wetBulb);
+    rootUnderground.push({uMat, uDots, uA, uB, wetBulb});
+
+    // ---- surface emitter droplets: visible water entering the soil from a normal viewing angle ----
+    const emGeo = new THREE.SphereGeometry(0.045,6,6);
+    const emMat = new THREE.MeshStandardMaterial({color:0x6FA0B8, transparent:true, roughness:0.25, metalness:0.1});
+    const emitters = [];
+    const emCount = 6;
+    for(let e=0;e<emCount;e++){
+      const ex = LAYOUT3D.fieldX0+1 + e*((LAYOUT3D.fieldX1-LAYOUT3D.fieldX0-2)/(emCount-1));
+      const drop = new THREE.Mesh(emGeo, emMat.clone());
+      drop.position.set(ex, 0.16, zc + (Math.random()-0.5)*3.2);
+      drop.visible = false;
+      scene.add(drop);
+      emitters.push({mesh:drop, baseY:0.16, x:ex, zBase:zc, phase:e/emCount});
+    }
+    surfaceEmitters.push(emitters);
+  });
+  // main spine flow dots
+  const mainDots = [];
+  for(let d=0;d<6;d++){
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.09,8,8), new THREE.MeshBasicMaterial({color:0x5E93A8, transparent:true}));
+    dot.visible=false; scene.add(dot); mainDots.push(dot);
+  }
+  // sensor -> controller signal pulses: small instrumentation-style packets, not giant beams
+  const signalDots = [];
+  for(let d=0;d<6;d++){
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.05,7,7), new THREE.MeshBasicMaterial({color:0xC9A648, transparent:true}));
+    dot.visible=false; scene.add(dot); signalDots.push(dot);
+  }
+
+  // ---- tank (reservoir with base frame, hatch, level band) ----
+  const tankGroup = new THREE.Group();
+  const legMat = new THREE.MeshStandardMaterial({color:0x6E6858,metalness:0.3,roughness:0.6});
+  for(let a=0;a<4;a++){
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.35,6), legMat);
+    const ang = a*Math.PI/2 + Math.PI/4;
+    leg.position.set(Math.cos(ang)*0.95,0.17,Math.sin(ang)*0.95);
+    tankGroup.add(leg);
+  }
+  const tankGeo = new THREE.CylinderGeometry(1.3,1.3,2.6,22);
+  const tankMat = new THREE.MeshStandardMaterial({color:0xE6DDC4, roughness:0.65});
+  const tankShell = new THREE.Mesh(tankGeo, tankMat);
+  tankShell.position.y=1.68;
+  tankShell.castShadow = interactive;
+  const waterGeo = new THREE.CylinderGeometry(1.15,1.15,1,22);
+  const waterMat = new THREE.MeshStandardMaterial({color:0x5E93A8, roughness:0.3, metalness:0.15});
+  const water = new THREE.Mesh(waterGeo, waterMat);
+  water.position.y=0.9;
+  const hatch = new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.35,0.08,16), new THREE.MeshStandardMaterial({color:0xC7BC9C,roughness:0.7}));
+  hatch.position.y = 3.0;
+  const levelBand = new THREE.Mesh(new THREE.TorusGeometry(1.32,0.02,6,24), new THREE.MeshStandardMaterial({color:0x374C30}));
+  levelBand.rotation.x = Math.PI/2;
+  levelBand.position.y = 1.68;
+  const tankLabel = new THREE.Sprite(new THREE.SpriteMaterial({map:makeLabelTexture(['RESERVOIR','R-01','5000 L']), transparent:true}));
+  tankLabel.scale.set(0.75,0.31,1);
+  tankLabel.position.set(1.7,1.9,0);
+  tankGroup.add(tankShell,water,hatch,levelBand,tankLabel);
+  tankGroup.position.set(LAYOUT3D.eqX, 0, LAYOUT3D.tankZ);
+  tankShell.userData = {kind:'tank'};
+  scene.add(tankGroup);
+
+  // ---- pump station (base, motor, coupling, inlet/outlet stubs, gauge) ----
+  const pumpGroup = new THREE.Group();
+  const pumpBase = new THREE.Mesh(new THREE.BoxGeometry(1.15,0.5,0.95), new THREE.MeshStandardMaterial({color:0xC7BC9C}));
+  pumpBase.position.y=0.25;
+  pumpBase.castShadow = interactive;
+  const pumpBody = new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.7,16), new THREE.MeshStandardMaterial({color:0x6E6858,metalness:0.45,roughness:0.45}));
+  pumpBody.rotation.z=Math.PI/2;
+  pumpBody.position.set(0,0.75,0);
+  pumpBody.castShadow = interactive;
+  const motorRing = new THREE.Mesh(new THREE.TorusGeometry(0.4,0.035,6,18), new THREE.MeshStandardMaterial({color:0x3a382f,metalness:0.5,roughness:0.4}));
+  motorRing.rotation.y = Math.PI/2;
+  motorRing.position.set(-0.36,0.75,0);
+  const coupling = new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,0.12,10), new THREE.MeshStandardMaterial({color:0x3a382f,metalness:0.6,roughness:0.4}));
+  coupling.rotation.z=Math.PI/2;
+  coupling.position.set(0.42,0.75,0);
+  const inletStub = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.3,8), pipeMat);
+  inletStub.rotation.z = Math.PI/2;
+  inletStub.position.set(0.62,0.75,0);
+  const outletStub = new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,0.3,8), pipeMat);
+  outletStub.position.set(0,1.05,0);
+  const gauge = new THREE.Mesh(new THREE.CircleGeometry(0.16,16), new THREE.MeshStandardMaterial({color:0xF2EEE3}));
+  gauge.position.set(0,1.15,0.42);
+  const gaugeNeedle = new THREE.Mesh(new THREE.BoxGeometry(0.02,0.13,0.01), new THREE.MeshBasicMaterial({color:0xA2503C}));
+  gaugeNeedle.position.set(0,1.2,0.43);
+  const pumpLabel = new THREE.Sprite(new THREE.SpriteMaterial({map:makeLabelTexture(['PUMP','P-01']), transparent:true}));
+  pumpLabel.scale.set(0.6,0.25,1);
+  pumpLabel.position.set(0,1.55,0);
+  pumpGroup.add(pumpBase,pumpBody,motorRing,coupling,inletStub,outletStub,gauge,gaugeNeedle,pumpLabel);
+  pumpGroup.position.set(LAYOUT3D.eqX,0,LAYOUT3D.pumpZ);
+  pumpBase.userData={kind:'pump'};
+  pumpBody.userData={kind:'pump'};
+  scene.add(pumpGroup);
+
+  // ---- controller cabinet (enclosure, hinge line, label, antenna) ----
+  const ctrlGroup = new THREE.Group();
+  const ctrlBox = new THREE.Mesh(new THREE.BoxGeometry(0.72,1.05,0.38), new THREE.MeshStandardMaterial({color:0xDED2AE}));
+  ctrlBox.position.y=0.62;
+  ctrlBox.castShadow = interactive;
+  const hinge = new THREE.Mesh(new THREE.BoxGeometry(0.02,1.0,0.02), new THREE.MeshStandardMaterial({color:0x8A8267}));
+  hinge.position.set(-0.35,0.62,0.195);
+  const ctrlLed = new THREE.Mesh(new THREE.SphereGeometry(0.05,8,8), new THREE.MeshStandardMaterial({color:0x41573C, emissive:0x1c3316}));
+  ctrlLed.position.set(0.22,0.95,0.2);
+  const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.35,5), new THREE.MeshStandardMaterial({color:0x2E2B23}));
+  antenna.position.set(0.26,1.32,-0.1);
+  const ctrlLabel = new THREE.Sprite(new THREE.SpriteMaterial({map:makeLabelTexture(['VERDANT','FIELD CONTROLLER','VCU-01']), transparent:true}));
+  ctrlLabel.scale.set(0.66,0.27,1);
+  ctrlLabel.position.set(0,0.62,0.21);
+  const legPost = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.05,0.2,6), new THREE.MeshStandardMaterial({color:0x5c5340}));
+  legPost.position.set(0,0.1,0);
+  ctrlGroup.add(ctrlBox,hinge,ctrlLed,antenna,ctrlLabel,legPost);
+  ctrlGroup.position.set(LAYOUT3D.eqX,0,LAYOUT3D.ctrlZ);
+  ctrlBox.userData={kind:'controller'};
+  scene.add(ctrlGroup);
+
+  // ---- canvas / renderer / camera ----
+  const canvas = opts.canvas;
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  if(interactive){
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  }
+  const camera = new THREE.PerspectiveCamera(42,1,0.1,120);
+  camera.position.set(9,13,20);
+
+  let controls=null;
+  if(interactive){
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.target.set(0,1,0);
+    controls.enableDamping=true; controls.dampingFactor=0.08;
+    controls.minDistance=6; controls.maxDistance=42;
+    controls.maxPolarAngle=1.22; controls.minPolarAngle=0.35;
+    controls.update();
+  } else {
+    camera.lookAt(0,1,0);
+  }
+
+  function resize(){
+    const w = canvas.clientWidth||canvas.parentElement.clientWidth||300;
+    const h = canvas.clientHeight||canvas.parentElement.clientHeight||300;
+    if(w<2||h<2) return;
+    renderer.setSize(w,h,false);
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const clock = new THREE.Clock();
+  let autoRotate = !interactive;
+  let camTransition = null;
+
+  function setCameraPreset(name, instant){
+    const presets = {
+      overview:{pos:new THREE.Vector3(9,13,20), tgt:new THREE.Vector3(3,0.5,0)},
+      water:{pos:new THREE.Vector3(LAYOUT3D.eqX+8,6,LAYOUT3D.tankZ+7), tgt:new THREE.Vector3(LAYOUT3D.eqX,1,LAYOUT3D.tankZ)},
+      zones:{pos:new THREE.Vector3(8,9,22), tgt:new THREE.Vector3(3,0.4,0)},
+      pump:{pos:new THREE.Vector3(LAYOUT3D.eqX+5,3.6,LAYOUT3D.pumpZ+5), tgt:new THREE.Vector3(LAYOUT3D.eqX,1,LAYOUT3D.pumpZ)},
+      controller:{pos:new THREE.Vector3(LAYOUT3D.eqX+4,3.2,LAYOUT3D.ctrlZ+4), tgt:new THREE.Vector3(LAYOUT3D.eqX,1,LAYOUT3D.ctrlZ)},
+    };
+    if(name==='root'){
+      const zi = (typeof state!=='undefined' && state.selected && (state.selected.kind==='zone'||state.selected.kind==='valve')) ? state.selected.id-1 : 2;
+      const zc = LAYOUT3D.zoneZ[zi];
+      presets.root = {pos:new THREE.Vector3(LAYOUT3D.sensorX-3,-1.4,zc+3), tgt:new THREE.Vector3(LAYOUT3D.sensorX-1,-0.5,zc)};
+    }
+    const p = presets[name]||presets.overview;
+    if(instant || !controls){ camera.position.copy(p.pos); if(controls){controls.target.copy(p.tgt); controls.update();} else camera.lookAt(p.tgt); return; }
+    camTransition = {from:camera.position.clone(), to:p.pos.clone(), fromT:controls.target.clone(), toT:p.tgt.clone(), start:performance.now(), dur:900};
+  }
+  function focusOn(kind,id){
+    const p = zPointFor(kind,id);
+    const off = kind==='zone'? new THREE.Vector3(-6,4,4) : new THREE.Vector3(5,3,5);
+    const pos = p.clone().add(off);
+    camTransition = {from:camera.position.clone(), to:pos, fromT:controls?controls.target.clone():p.clone(), toT:p.clone(), start:performance.now(), dur:850};
+  }
+
+  let dotCycle=0;
+  const NOMINAL_FLOW = 8; // L/min used only to scale the visualization, not simulation
+  const dryPipe = 0xB6A780, wetPipe = 0x4F7C90;
+  function tintPipe(mat, active, ratio){
+    const target = active ? wetPipe : dryPipe;
+    mat.color.lerp(new THREE.Color(target), active?0.12:0.06);
+    mat.emissive = mat.emissive||new THREE.Color(0x000000);
+    mat.emissive.setHex(active?0x0c1d24:0x000000);
+    mat.emissiveIntensity = active? Math.max(0.15,ratio*0.5) : 0;
+  }
+  function updateFlow(simState, dt){
+    const flowRatio = clamp((simState.pump.flow||0)/NOMINAL_FLOW, 0, 1);
+    const anyRunning = simState.pump.running && simState.pump.flow>0.05;
+    const speed = 0.7 + flowRatio*1.3; // stalled/blocked flow visibly crawls
+    tintPipe(spineMat, anyRunning, flowRatio);
+    tintPipe(feederMat, anyRunning, flowRatio);
+    mainDots.forEach((dot,i)=>{
+      if(!anyRunning){ dot.visible=false; return; }
+      dot.visible=true;
+      dot.material.opacity = 0.4+flowRatio*0.6;
+      const t = ((dotCycle*0.15*speed)+i/mainDots.length)%1;
+      dot.position.lerpVectors(spineTop, spineBot, t);
+      dot.position.y=0.55;
+    });
+    simState.zones.forEach((z,i)=>{
+      const fd = flowDots[i];
+      const active = z.valve && anyRunning;
+      tintPipe(fd.branchMat, active, flowRatio);
+      fd.dots.forEach((dot,di)=>{
+        if(!active){ dot.visible=false; return; }
+        dot.visible=true;
+        const t = ((dotCycle*0.2*speed)+di/fd.dots.length)%1;
+        dot.position.lerpVectors(fd.a, fd.b, t);
+        dot.position.y=0.48;
+      });
+      // underground root-zone: lateral drip flow + spreading wet bulb around the roots
+      const ru = rootUnderground[i];
+      tintPipe(ru.uMat, active, flowRatio);
+      ru.uDots.forEach((dot,di)=>{
+        if(!active){ dot.visible=false; return; }
+        dot.visible=true;
+        const t = ((dotCycle*0.1*speed)+di/ru.uDots.length)%1;
+        dot.position.lerpVectors(ru.uA, ru.uB, t);
+      });
+      const moistT = clamp(z.moisture/100,0,1);
+      const targetScale = 0.35 + moistT*1.3 + (active?0.25:0);
+      ru.wetBulb.scale.y += (0.28*(0.4+moistT) - ru.wetBulb.scale.y)*Math.min(1,dt*1.5);
+      ru.wetBulb.scale.x += (targetScale*1.6 - ru.wetBulb.scale.x)*Math.min(1,dt*1.5);
+      ru.wetBulb.scale.z += (targetScale*1.1 - ru.wetBulb.scale.z)*Math.min(1,dt*1.5);
+      ru.wetBulb.material.opacity = 0.14 + moistT*0.28;
+
+      // surface emitter droplets — the visible moment water enters the soil
+      surfaceEmitters[i].forEach((em,ei)=>{
+        if(!active){ em.mesh.visible=false; return; }
+        em.mesh.visible=true;
+        const cyc = ((dotCycle*0.9*speed)+em.phase)%1;
+        em.mesh.position.y = em.baseY - cyc*0.22;
+        em.mesh.position.z = em.zBase + Math.sin(em.phase*30+dotCycle*0.4)*0.15;
+        em.mesh.material.opacity = clamp(1-cyc*1.15, 0, 1);
+        em.mesh.scale.setScalar(1-cyc*0.45);
+      });
+    });
+    dotCycle += dt;
+  }
+
+  function update(simState, dt){
+    // tank
+    const pct = clamp(simState.tank.current/simState.tank.capacity,0,1);
+    water.scale.y = Math.max(pct,0.001);
+    water.position.y = 0.4 + (pct*1.0)/2;
+    water.material.color.set(pct<0.15?0x9C4B3A:0x5E93A8);
+    // pump
+    const running = simState.pump.running;
+    if(running){ coupling.rotation.x += dt*(2+simState.pump.rpm/500); motorRing.rotation.x -= dt*(1.4+simState.pump.rpm/700); }
+    pumpGroup.position.y = running? Math.sin(performance.now()/70)*0.01 : 0;
+    gaugeNeedle.rotation.z = -0.9 + (simState.pump.pressure/3.2)*1.8;
+    // controller led
+    ctrlLed.material.emissive.set(simState.connection.online?0x1c3316:0x5a1c14);
+    ctrlLed.material.color.set(simState.connection.online?0x41573C:0x9C4B3A);
+    // soil beds + valves + sensors
+    simState.zones.forEach((z,i)=>{
+      soilBeds[i].material.color.copy(moistColor(z.moisture));
+      const v = valveMeshes[i];
+      v.userData.led.material.color.set(z.valve?0x374C30:0xB6A780);
+      v.userData.led.material.emissive.set(z.valve?0x1c3316:0x000000);
+      v.userData.wheel.rotation.x = z.valve? Math.PI/3 : 0;
+      const sn = sensorMeshes[i];
+      const disc = simState.faults && simState.faults.soilDisconnected===z.id;
+      sn.userData.led.material.color.set(disc?0x9C4B3A:0x3E6E86);
+      sn.userData.led.material.emissive.set(disc?0x5a1c14:0x1c3540);
+      const sc = disc? 1 : 1 + Math.sin(performance.now()/600 + i)*0.03;
+      sn.scale.setScalar(sc);
+    });
+    // gentle wind on foliage (two canopy layers)
+    const windK = (simState.weather && simState.weather.wind ? simState.weather.wind/25 : 0.3);
+    treeGroups.forEach(tg=>{
+      const m4 = new THREE.Matrix4();
+      const t = performance.now()/900;
+      tg.phases.forEach((p,n)=>{
+        const sway = Math.sin(t+p.ph)*0.05*(0.6+windK);
+        m4.makeRotationZ(sway);
+        m4.setPosition(p.x + Math.sin(t*0.6+p.ph)*0.02*(0.6+windK),1.22*p.hVar,p.z);
+        tg.foliage.setMatrixAt(n,m4);
+        if(tg.foliage2){
+          m4.makeRotationZ(-sway*0.8);
+          m4.setPosition(p.x+0.18 + Math.sin(t*0.6+p.ph+1)*0.02*(0.6+windK),1.5*p.hVar,p.z+0.1);
+          tg.foliage2.setMatrixAt(n,m4);
+        }
+      });
+      tg.foliage.instanceMatrix.needsUpdate=true;
+      if(tg.foliage2) tg.foliage2.instanceMatrix.needsUpdate=true;
+    });
+    updateFlow(simState, dt);
+
+    // sensor -> controller signal pulses (instrumentation-style, short-lived, data-driven)
+    const pulses = simState.signalPulses||[];
+    const ctrlPt = zPointFor('controller');
+    signalDots.forEach((d,i)=>{
+      const p = pulses[i];
+      if(!p){ d.visible=false; return; }
+      const prog = clamp((Date.now()-p.start)/700, 0, 1);
+      const fromPt = zPointFor('zone', p.zoneId).clone(); fromPt.y = 0.72;
+      d.position.lerpVectors(fromPt, ctrlPt, prog);
+      d.position.y += Math.sin(prog*Math.PI)*0.45;
+      d.visible = prog<1;
+      d.material.opacity = 1-Math.abs(prog-0.5)*0.7;
+    });
+
+    if(camTransition){
+      const el = performance.now()-camTransition.start;
+      const t = clamp(el/camTransition.dur,0,1);
+      const te = 1-Math.pow(1-t,3);
+      camera.position.lerpVectors(camTransition.from, camTransition.to, te);
+      if(controls) controls.target.lerpVectors(camTransition.fromT, camTransition.toT, te);
+      if(t>=1) camTransition=null;
+    }
+  }
+
+  function render(){
+    const dt = Math.min(clock.getDelta(),0.1);
+    if(controls) controls.update();
+    if(autoRotate){
+      const t = performance.now()/9000;
+      camera.position.x = Math.sin(t)*13;
+      camera.position.z = Math.cos(t)*13;
+      camera.position.y = 8.5;
+      camera.lookAt(0,0.6,0);
+    }
+    renderer.render(scene,camera);
+    return dt;
+  }
+
+  return {scene,camera,renderer,controls,update,render,resize,setCameraPreset,focusOn,
+    pickables:[...pickMeshes, tankShell, pumpBase, pumpBody, ctrlBox],
+    treeGroups, soilBeds, valveMeshes, sensorMeshes};
+}
+
+/* JS_MARKER_ENGINE */
+
+/* ==================================================================
+   PART C — APP SHELL  (nav, hero, stage interaction, status bar)
+   ================================================================== */
+let simMode = 'simple';
+let currentView = 'explore';
+let stage=null, heroScene=null, miniScene=null;
+let camPreset='overview';
+
+function boot(){
+  document.getElementById('hero-explore').addEventListener('click', ()=>enterApp('explore'));
+  document.getElementById('hero-demo').addEventListener('click', ()=>{ enterApp('explore'); setTimeout(startStory,500); });
+  document.getElementById('logo-btn').addEventListener('click', ()=>{
+    document.getElementById('app').style.display='none';
+    document.getElementById('hero').classList.remove('hidden');
+  });
+  document.getElementById('demo-btn').addEventListener('click', ()=>{ enterApp('explore'); setTimeout(startStory,300); });
+  function togglePresentation(on){
+    document.body.classList.toggle('presentation-mode', on);
+    document.getElementById('present-btn').classList.toggle('active', on);
+    document.getElementById('present-exit').classList.toggle('hidden', !on);
+    if(on) enterApp('explore');
+    setTimeout(()=>{ if(stage) stage.resize(); },60);
+  }
+  document.getElementById('present-btn').addEventListener('click', ()=>togglePresentation(!document.body.classList.contains('presentation-mode')));
+  document.getElementById('present-exit').addEventListener('click', ()=>togglePresentation(false));
+  document.getElementById('follow-water-btn').addEventListener('click', ()=>{
+    const sel = state.selected;
+    const zoneId = (sel && (sel.kind==='zone'||sel.kind==='valve')) ? sel.id : null;
+    followWater(zoneId || state.zones.slice().sort((a,b)=>a.moisture-b.moisture)[0].id);
+  });
+
+  document.getElementById('pri-nav').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    enterApp(b.dataset.view);
+  });
+  document.getElementById('sim-toggle').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    simMode = b.dataset.simmode;
+    document.querySelectorAll('#sim-toggle button').forEach(x=>x.classList.toggle('active',x===b));
+    document.body.classList.toggle('simple', simMode==='simple');
+  });
+
+  heroScene = buildOrchard({canvas:document.getElementById('hero-canvas'), interactive:false});
+  initStage();
+  initExplain();
+  initCamToolbar();
+  initGlossaryAndArch();
+  initSteps();
+  initPhone();
+  initAutomationPanel();
+  initTestPanel();
+  initDataView();
+  initStory();
+
+  requestAnimationFrame(tickFrame);
+  requestAnimationFrame(renderLoop);
+}
+
+function enterApp(view){
+  document.getElementById('hero').classList.add('hidden');
+  document.getElementById('app').style.display='block';
+  switchView(view||'explore');
+}
+
+function switchView(view){
+  currentView = view;
+  document.querySelectorAll('#pri-nav button').forEach(x=>x.classList.toggle('active', x.dataset.view===view));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  hideInspector();
+  if(view==='explore') setTimeout(()=>stage.resize(),30);
+}
+
+function initStage(){
+  stage = buildOrchard({canvas:document.getElementById('stage3d'), interactive:true});
+  const loading = document.getElementById('stage-loading');
+  setTimeout(()=>{ loading.style.opacity='0'; setTimeout(()=>loading.style.display='none',400); },500);
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  function pick(clientX,clientY){
+    const rect = stage.renderer.domElement.getBoundingClientRect();
+    mouse.x = ((clientX-rect.left)/rect.width)*2-1;
+    mouse.y = -((clientY-rect.top)/rect.height)*2+1;
+    raycaster.setFromCamera(mouse, stage.camera);
+    const hits = raycaster.intersectObjects(stage.pickables);
+    return hits.length? hits[0].object.userData : null;
+  }
+  let downX=0, downY=0;
+  stage.renderer.domElement.addEventListener('pointerdown', e=>{downX=e.clientX;downY=e.clientY;});
+  stage.renderer.domElement.addEventListener('pointerup', e=>{
+    if(Math.abs(e.clientX-downX)>5 || Math.abs(e.clientY-downY)>5) return; // was a drag
+    const hit = pick(e.clientX,e.clientY);
+    if(hit) showInspector(hit.kind, hit.id);
+    else hideInspector();
+  });
+}
+
+function renderLoop(){
+  if(stage) stage.render();
+  if(heroScene) heroScene.render();
+  if(miniScene) miniScene.render();
+  requestAnimationFrame(renderLoop);
+}
+
+/* ---- global tick: called ~60fps by engine ---- */
+function onTick(){
+  if(state.signalPulses.length){
+    const now = Date.now();
+    state.signalPulses = state.signalPulses.filter(p=>now-p.start<900);
+  }
+  if(stage) stage.update(state, 1/60);
+  if(heroScene) heroScene.update(state, 1/60);
+  if(miniScene) miniScene.update(state, 1/60);
+  renderStatusBar();
+  if(document.getElementById('inspector') && !document.getElementById('inspector').classList.contains('hidden')) refreshInspector();
+  if(currentView==='control') { renderPhone(); }
+  if(currentView==='data') { /* charts refreshed on demand */ }
+  if(currentView==='how') { renderArchLive(); }
+  renderRuleFlow();
+}
+
+function renderStatusBar(){
+  const el = document.getElementById('status-bar'); if(!el) return;
+  const sensorsOnline = state.zones.filter(z=>state.faults.soilDisconnected!==z.id).length;
+  const valvesOnline = state.zones.filter(z=>state.faults.valveFailure!==z.id).length;
+  const powerNormal = !state.faults.overcurrent && !state.faults.pumpFailure;
+  const items = [
+    ['POWER', powerNormal?'NORMAL':'FAULT', powerNormal?'on':'off'],
+    ['NETWORK', state.connection.online?'ONLINE':'OFFLINE', state.connection.online?'on':'off'],
+    ['PUMP', state.pump.running?'RUNNING':'IDLE', state.pump.running?'on':''],
+    ['WATER', tankPct().toFixed(0)+'%', tankPct()<state.thresholds.tankSafety?'off':''],
+    ['SENSORS', sensorsOnline+'/4', sensorsOnline<4?'off':'on'],
+    ['VALVES', valvesOnline+'/4', valvesOnline<4?'off':'on'],
+  ];
+  if(simMode==='engineering'){
+    items.push(['FLOW', state.pump.flow.toFixed(1)+' L/MIN', '']);
+    items.push(['MODE', state.mode, '']);
+  }
+  el.innerHTML = items.map(it=>`<span class="si ${it[2]}">${it[0]}<i class="dot"></i><b>${it[1]}</b></span>`).join('');
+}
+
+/* ---- camera toolbar / zoom ---- */
+function initCamToolbar(){
+  document.getElementById('cam-toolbar').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    camPreset = b.dataset.cam;
+    document.querySelectorAll('#cam-toolbar button').forEach(x=>x.classList.toggle('active',x===b));
+    stage.setCameraPreset(camPreset);
+  });
+  document.getElementById('zoom-in').addEventListener('click', ()=>{
+    if(!stage.controls) return;
+    const dir = new THREE.Vector3().subVectors(stage.camera.position, stage.controls.target);
+    dir.multiplyScalar(0.82); stage.camera.position.copy(stage.controls.target).add(dir);
+  });
+  document.getElementById('zoom-out').addEventListener('click', ()=>{
+    if(!stage.controls) return;
+    const dir = new THREE.Vector3().subVectors(stage.camera.position, stage.controls.target);
+    dir.multiplyScalar(1.22); stage.camera.position.copy(stage.controls.target).add(dir);
+  });
+}
+
+/* ---- inspector ---- */
+function inspectorContent(kind,id){
+  if(kind==='tank'){
+    return {eyebrow:'Water tank', title:'Reservoir', rows:[
+      ['Capacity', state.tank.capacity.toLocaleString()+' L'],
+      ['Current', Math.round(state.tank.current).toLocaleString()+' L'],
+      ['Level', tankPct().toFixed(1)+'%'],
+      ['Status', tankPct()<state.thresholds.tankSafety?'LOW':'NORMAL'],
+    ]};
+  }
+  if(kind==='pump'){
+    const rows = [['Status', state.pump.running?'RUNNING':'OFF']];
+    if(simMode==='engineering'){
+      rows.push(['RPM', Math.round(state.pump.rpm).toLocaleString()]);
+      rows.push(['Pressure', state.pump.pressure.toFixed(1)+' bar']);
+      rows.push(['Flow', state.pump.flow.toFixed(1)+' L/min']);
+      rows.push(['Power', state.pump.power+' W']);
+    } else {
+      rows.push(['Flow', state.pump.flow.toFixed(1)+' L/min']);
+    }
+    return {eyebrow:'Pump station', title:'Main pump', rows};
+  }
+  if(kind==='controller'){
+    return {eyebrow:'Control cabinet', title:'VERDANT controller', rows:[
+      ['Connection', state.connection.online?'ONLINE':'OFFLINE'],
+      ['Mode', state.mode],
+      ['Last sync', Math.round(state.simSeconds-state.connection.lastSyncSec)+'s ago'],
+      ['Sensors', state.zones.filter(z=>state.faults.soilDisconnected!==z.id).length+' / 4 online'],
+    ]};
+  }
+  if(kind==='valve'){
+    const z = state.zones.find(z=>z.id===id);
+    return {eyebrow:'Zone '+id+' valve', title:z.name+' — '+z.crop, kind:'valve', id,
+      rows:[['Status', z.valve?'OPEN':'CLOSED'],['Zone moisture', z.moisture.toFixed(1)+'%']]};
+  }
+  if(kind==='zone'){
+    const z = state.zones.find(z=>z.id===id);
+    const disc = state.faults.soilDisconnected===z.id;
+    const rows = [
+      ['Soil', disc?'NO DATA':z.moisture.toFixed(1)+'%'],
+      ['Target', state.thresholds.max+'%'],
+      ['Status', z.valve?'NEEDS WATER · WATERING':(z.moisture<state.thresholds.min?'NEEDS WATER':'HEALTHY')],
+      ['Valve', z.valve?'OPEN':'CLOSED'],
+    ];
+    if(simMode==='engineering') rows.push(['Signal', disc?'LOST':'GOOD']);
+    return {eyebrow:'Soil sensor S-0'+id, title:z.name+' — '+z.crop, kind:'zone', id, rows};
+  }
+}
+function showInspector(kind,id){
+  state.selected={kind,id};
+  refreshInspector();
+}
+function refreshInspector(){
+  const {kind,id} = state.selected;
+  const data = inspectorContent(kind,id);
+  const box = document.getElementById('inspector');
+  let actions='';
+  if(kind==='zone'||kind==='valve'){
+    const z = state.zones.find(z=>z.id===id);
+    actions = `<div class="insp-actions"><button id="insp-act" class="${z.valve?'':'primary'}">${z.valve?'Close valve':'Irrigate zone'}</button><button id="insp-decision">Show decision</button></div>`;
+  }
+  box.innerHTML = `<button class="insp-close" id="insp-close">×</button>
+    <div class="insp-eyebrow">${data.eyebrow}</div>
+    <div class="insp-title">${data.title}</div>
+    ${data.rows.map(r=>`<div class="insp-row"><span class="ir-label">${r[0]}</span><span class="ir-value">${r[1]}</span></div>`).join('')}
+    ${actions}`;
+  box.classList.remove('hidden');
+  positionInspector(kind,id);
+  document.getElementById('insp-close').onclick=(ev)=>{ev.stopPropagation();hideInspector();};
+  const act = document.getElementById('insp-act');
+  if(act) act.onclick=(ev)=>{
+    ev.stopPropagation();
+    const z = state.zones.find(z=>z.id===id);
+    if(state.mode!=='MANUAL') state.mode='MANUAL';
+    if(z.valve) closeValve(z,'manual close'); else openValve(z,'manual');
+    refreshInspector();
+  };
+  const decBtn = document.getElementById('insp-decision');
+  if(decBtn) decBtn.onclick=(ev)=>{ ev.stopPropagation(); showDecisionChain(id); };
+  const dp = document.getElementById('decision-panel');
+  if(dp && !dp.classList.contains('hidden') && (kind==='zone'||kind==='valve')) showDecisionChain(id);
+}
+function hideInspector(){ state.selected=null; const b=document.getElementById('inspector'); if(b) b.classList.add('hidden'); hideDecisionChain(); }
+function positionInspector(kind,id){
+  const box = document.getElementById('inspector');
+  const wrap = document.querySelector('.stage-wrap');
+  const p = zPointFor(kind,id);
+  const v = p.clone().project(stage.camera);
+  const wrapRect = wrap.getBoundingClientRect();
+  let left = (v.x*0.5+0.5)*wrapRect.width + 24;
+  let top = (-v.y*0.5+0.5)*wrapRect.height - 20;
+  left = clamp(left, 10, wrapRect.width-244);
+  top = clamp(top, 10, wrapRect.height-190);
+  box.style.left=left+'px'; box.style.top=top+'px';
+}
+
+/* JS_MARKER_ENGINE */
+
+/* ==================================================================
+   PART D — EXPLAIN SYSTEM (guided highlight sequence)
+   ================================================================== */
+const EXPLAIN_STEPS = [
+  {kind:'zone', id:3, title:'Soil sensor', text:'Measures how much moisture is in the soil, about 20 cm down.'},
+  {kind:'controller', title:'Controller', text:'Receives every sensor reading and decides whether irrigation should run.'},
+  {kind:'overview', title:'Cloud connection', text:'The controller keeps the cloud in sync, so the same picture is available from anywhere.'},
+  {kind:'pump', title:'Pump', text:'Pressurizes water so it can move through the irrigation network.'},
+  {kind:'valve', id:3, title:'Valve', text:'Opens or closes to control which zone actually receives water.'},
+  {kind:'zone', id:3, title:'Soil, responding', text:'As water arrives the soil itself darkens — moisture you can see, not just a number.'},
+];
+let explainOn=false, explainStep=0, explainTimer=null;
+function initExplain(){
+  document.getElementById('explain-btn').addEventListener('click', ()=>{
+    explainOn = !explainOn;
+    document.getElementById('explain-btn').classList.toggle('on', explainOn);
+    if(explainOn){ explainStep=0; showExplainStep(); } else { clearExplain(); }
+  });
+  document.getElementById('explain-caption').addEventListener('click', ()=>{
+    explainStep++;
+    if(explainStep>=EXPLAIN_STEPS.length){ explainOn=false; document.getElementById('explain-btn').classList.remove('on'); clearExplain(); return; }
+    showExplainStep();
+  });
+}
+function showExplainStep(){
+  clearTimeout(explainTimer);
+  const s = EXPLAIN_STEPS[explainStep];
+  if(s.kind==='overview') stage.setCameraPreset('overview'); else stage.focusOn(s.kind,s.id);
+  const cap = document.getElementById('explain-caption');
+  cap.classList.remove('hidden');
+  cap.innerHTML = `<div class="ec-title">${explainStep+1} of ${EXPLAIN_STEPS.length} · click to continue</div><b>${s.title}.</b> ${s.text}
+    <div class="ec-nav">${EXPLAIN_STEPS.map((_,i)=>`<span class="${i===explainStep?'on':''}"></span>`).join('')}</div>`;
+  explainTimer = setTimeout(()=>{ if(explainOn){ explainStep++; if(explainStep>=EXPLAIN_STEPS.length){ explainOn=false; document.getElementById('explain-btn').classList.remove('on'); clearExplain(); } else showExplainStep(); } }, 4600);
+}
+function clearExplain(){
+  clearTimeout(explainTimer);
+  document.getElementById('explain-caption').classList.add('hidden');
+}
+
+/* ==================================================================
+   PART E — HOW IT WORKS (steps, architecture, glossary)
+   ================================================================== */
+const STEP5_DEFS = [
+  {num:'01', title:'Sense', body:'Sensors monitor the orchard — soil moisture, temperature, humidity and rainfall.', focus:{kind:'zone',id:3}},
+  {num:'02', title:'Connect', body:'The controller receives readings from every sensor in the field.', focus:{kind:'controller'}},
+  {num:'03', title:'Think', body:'Irrigation logic weighs soil moisture, weather, rain, tank level and safety conditions.', focus:{kind:'controller'}},
+  {num:'04', title:'Act', body:'The controller operates the pump and valves to deliver exactly what a zone needs.', focus:{kind:'pump'}},
+  {num:'05', title:'Monitor', body:'The owner can see everything, and control it, from a phone — anywhere.', focus:{kind:'overview'}},
+];
+function initSteps(){
+  document.getElementById('steps5').innerHTML = STEP5_DEFS.map(s=>`
+    <div class="step5" data-focus='${JSON.stringify(s.focus)}'>
+      <div class="s5-num">${s.num}</div>
+      <div class="s5-title">${s.title}</div>
+      <div class="s5-body">${s.body}</div>
+    </div>`).join('');
+  document.querySelectorAll('#steps5 .step5').forEach(el=>{
+    el.onclick = ()=>{
+      const f = JSON.parse(el.dataset.focus);
+      enterApp('explore');
+      setTimeout(()=>{ f.kind==='overview'? stage.setCameraPreset('overview') : stage.focusOn(f.kind,f.id); },50);
+    };
+  });
+}
+function initGlossaryAndArch(){
+  const nodes = [
+    {label:'Phone', focus:{v:'control'}},
+    {label:'Internet', focus:null},
+    {label:'Cloud', focus:null},
+    {label:'IoT controller', focus:{kind:'controller'}},
+  ];
+  document.getElementById('arch-diagram').innerHTML = `
+    <div class="arch-row">
+      ${nodes.map((n,i)=>`<div class="arch-node" data-i="${i}" data-net="${i}"><div class="an-label">${n.label}<span class="live-dot"></span></div></div>${i<nodes.length-1?'<span class="arch-arrow" data-arrow="'+i+'"><span class="pkt"></span>→</span>':''}`).join('')}
+    </div>
+    <div class="arch-leaves">
+      ${['Soil','Temperature','Humidity','Rain','Tank','Flow'].map((n,i)=>`<div class="arch-node" data-sensor="${i}"><div class="an-label">${n}<span class="live-dot"></span></div><div class="an-sub">sensor</div></div>`).join('')}
+      ${['Pump','Valve 1','Valve 2','Valve 3','Valve 4'].map((n,i)=>`<div class="arch-node actuator" data-actuator="${i}"><div class="an-label">${n}<span class="live-dot"></span></div><div class="an-sub">actuator</div></div>`).join('')}
+    </div>
+    <div class="arch-map-caption" id="arch-map-caption">Live system state — dots and flow reflect the simulation in real time.</div>`;
+  document.querySelectorAll('#arch-diagram .arch-node[data-i]').forEach((el,i)=>{
+    el.onclick = ()=>{
+      const f = nodes[i].focus;
+      if(!f) return;
+      enterApp(f.v?'control':'explore');
+      if(!f.v) setTimeout(()=>stage.focusOn(f.kind),50);
+    };
+  });
+  document.querySelectorAll('#arch-diagram .arch-node[data-actuator]').forEach((el,i)=>{
+    el.onclick = ()=>{
+      enterApp('explore');
+      setTimeout(()=>{ i===0? stage.focusOn('pump') : stage.focusOn('valve', i); },50);
+    };
+  });
+
+  const GLOSS = [
+    ['Soil moisture sensor','Measures the amount of moisture present in the soil.'],
+    ['IoT controller','Receives sensor information and controls the irrigation equipment.'],
+    ['Solenoid valve','Electrically opens or closes water flow to a specific zone.'],
+    ['Water pump','Creates the pressure required to move water through the irrigation system.'],
+    ['Flow sensor','Confirms that water is actually moving through the pipe.'],
+    ['Cloud connection','Lets telemetry and commands travel between the orchard and a remote user.'],
+    ['Mobile application','Provides remote monitoring and control of the whole system.'],
+  ];
+  document.getElementById('glossary').innerHTML = GLOSS.map(g=>`<div class="gloss-item"><h4>${g[0]}</h4><p>${g[1]}</p></div>`).join('');
+}
+
+/* ---- live system map: reflects real simulation state, not a static picture ---- */
+function renderArchLive(){
+  const diagram = document.getElementById('arch-diagram');
+  if(!diagram) return;
+  const online = state.connection.online;
+  const anyOpen = state.zones.some(z=>z.valve);
+
+  // network spine: Phone -> Internet -> Cloud -> Controller
+  diagram.querySelectorAll('.arch-node[data-net]').forEach(el=>{
+    el.classList.toggle('live-active', online);
+    el.classList.toggle('live-fault', !online);
+  });
+  diagram.querySelectorAll('.arch-arrow[data-arrow]').forEach(el=>{
+    el.classList.toggle('flowing', online);
+  });
+
+  // env/soil sensors (Soil, Temp, Humidity, Rain, Tank, Flow)
+  const soilFault = state.faults.soilDisconnected!==null;
+  const tankLow = tankPct() < state.thresholds.tankSafety;
+  const flowActive = state.pump.running && state.pump.flow>0.5;
+  const flowFault = state.pump.running && state.faults.noFlow;
+  const sensorState = [
+    soilFault?'fault':'active',        // Soil
+    'active',                          // Temperature
+    'active',                          // Humidity
+    state.weather.rain>0.35?'active':'', // Rain
+    tankLow?'warn':'active',           // Tank
+    flowFault?'fault':(flowActive?'active':''), // Flow
+  ];
+  diagram.querySelectorAll('.arch-node[data-sensor]').forEach(el=>{
+    const i = +el.dataset.sensor;
+    const s = sensorState[i];
+    el.classList.toggle('live-active', s==='active');
+    el.classList.toggle('live-warn', s==='warn');
+    el.classList.toggle('live-fault', s==='fault');
+  });
+
+  // actuators: Pump, Valve 1-4
+  diagram.querySelectorAll('.arch-node[data-actuator]').forEach(el=>{
+    const i = +el.dataset.actuator;
+    if(i===0){
+      el.classList.toggle('live-active', state.pump.running);
+      el.classList.toggle('live-fault', state.faults.pumpFailure);
+    } else {
+      const z = state.zones[i-1];
+      el.classList.toggle('live-active', !!(z && z.valve));
+      el.classList.toggle('live-fault', state.faults.valveFailure===(z&&z.id));
+    }
+  });
+
+  const cap = document.getElementById('arch-map-caption');
+  if(cap){
+    if(!online) cap.textContent = 'NETWORK OFFLINE — controller continues on local fail-safe logic.';
+    else if(anyOpen) cap.textContent = `Live: pump ${state.pump.running?'running':'idle'}, ${state.zones.filter(z=>z.valve).length} zone(s) irrigating, telemetry streaming to the phone.`;
+    else cap.textContent = 'Live: system monitoring, no irrigation in progress.';
+  }
+}
+
+/* ==================================================================
+   PART F — PHONE (Control view)
+   ================================================================== */
+let phonePane='home';
+function initPhone(){
+  document.getElementById('phone-tabs').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    selectPhonePane(b.dataset.pane);
+  });
+}
+function selectPhonePane(pane){
+  phonePane = pane;
+  document.querySelectorAll('#phone-tabs button').forEach(x=>x.classList.toggle('active', x.dataset.pane===pane));
+  ['home','orchard','automation','activity','system'].forEach(p=>{
+    document.getElementById('pane-'+p).style.display = p===phonePane?'block':'none';
+  });
+  if(phonePane==='orchard') ensureMiniScene();
+  renderPhone(true);
+}
+function ensureMiniScene(){
+  if(miniScene) return;
+  const c = document.getElementById('mini3d-canvas');
+  if(!c) return;
+  miniScene = buildOrchard({canvas:c, interactive:false});
+}
+function phPaneHome(){
+  const avg = state.zones.reduce((s,z)=>s+z.moisture,0)/state.zones.length;
+  const cond = avg>=35 && tankPct()>15 ? 'HEALTHY' : (avg<20?'NEEDS ATTENTION':'FAIR');
+  return `
+  <div class="ph-greet">Good ${state.simSeconds%86400<12*3600?'morning':'evening'}</div>
+  <div class="ph-status-card">
+    <div class="psc-top"><span class="psc-title">Orchard status</span><span class="psc-badge ${cond!=='HEALTHY'?'warn':''}">${cond}</span></div>
+    <div class="psc-grid">
+      <div class="psc-stat"><div class="ps-label">Soil moisture</div><div class="ps-value">${avg.toFixed(0)}%</div></div>
+      <div class="psc-stat"><div class="ps-label">Water tank</div><div class="ps-value">${Math.round(state.tank.current).toLocaleString()} L</div></div>
+      <div class="psc-stat"><div class="ps-label">Weather</div><div class="ps-value">${state.weather.temp.toFixed(0)}°C</div></div>
+      <div class="psc-stat"><div class="ps-label">Connection</div><div class="ps-value" style="font-size:13px;">${state.connection.online?'Online':'Offline'}</div></div>
+    </div>
+  </div>
+  <div class="ph-sectitle">Zones</div>
+  ${state.zones.map(z=>phZoneCard(z)).join('')}
+  `;
+}
+function phZoneCard(z){
+  const needs = z.moisture < state.thresholds.min;
+  const tag = z.valve? `<span class="pz-tag watering">Watering</span>` : needs? `<span class="pz-tag needs">Needs water</span>` : `<span class="pz-tag ok">Healthy</span>`;
+  return `<div class="phone-zone" data-zc="${z.id}">
+    <div class="pz-top"><div><div class="pz-name">${z.name} · ${z.crop}</div><div class="pz-sub">Target ${state.thresholds.max}%</div></div><div class="pz-pct">${z.moisture.toFixed(0)}%</div></div>
+    <div class="pz-bar"><div class="pz-bar-fill" style="width:${z.moisture}%"></div></div>
+    ${tag}
+  </div>`;
+}
+function phZoneDetail(id){
+  const z = state.zones.find(z=>z.id===id);
+  const needs = z.moisture < state.thresholds.min;
+  return `<div class="ph-status-card">
+    <div class="psc-top"><span class="psc-title">${z.name} · ${z.crop}</span><span class="pz-pct">${z.moisture.toFixed(1)}%</span></div>
+    <div class="pz-bar" style="margin-bottom:12px;"><div class="pz-bar-fill" style="width:${z.moisture}%"></div></div>
+    <div style="font-size:12px;color:var(--ink-faint);margin-bottom:12px;">${needs?'Below target — ready to irrigate.':'Within target range.'}</div>
+    <button class="irrigate-btn ${z.valve?'stop':''}" id="irrigate-go" ${state._cmdRunning?'disabled':''}>${z.valve?'Stop irrigation':'Irrigate zone'}</button>
+    <div class="cmd-chain hidden" id="cmd-chain"></div>
+  </div>`;
+}
+function phPaneAutomation(){
+  return `<div class="ph-sectitle">Automation rule</div>
+  <div class="ph-status-card">
+    <div style="font-size:13px;line-height:1.7;color:var(--ink-dim);">
+    If soil moisture falls below <b style="color:var(--forest)">${state.thresholds.min}%</b>, the controller opens the valve and starts the pump — until moisture reaches <b style="color:var(--forest)">${state.thresholds.max}%</b>, or <b style="color:var(--forest)">${state.thresholds.maxTimeMin} min</b> pass.
+    </div>
+  </div>
+  <div class="ph-sectitle">Mode</div>
+  <div class="ph-status-card" style="font-size:13px;">Currently <b>${state.mode}</b>. Change mode from the Control panel on desktop.</div>`;
+}
+function phPaneActivity(){
+  const recent = state.logs.slice(-20).reverse();
+  return `<div class="ph-sectitle">Recent activity</div>` + (recent.length? recent.map(l=>`<div class="phone-zone"><div class="pz-name" style="font-size:12.5px;">${l.msg}</div><div class="pz-sub">${l.t}</div></div>`).join('') : `<div class="pz-sub">No activity yet.</div>`);
+}
+function phPaneSystem(){
+  return `<div class="ph-sectitle">System</div>
+  <div class="phone-zone"><div class="pz-name">Controller</div><div class="pz-sub">VERDANT controller · ${state.connection.online?'Online':'Offline'}</div></div>
+  <div class="phone-zone"><div class="pz-name">Pump</div><div class="pz-sub">${state.pump.running?'Running':'Idle'} · ${state.pump.power} W</div></div>
+  <div class="phone-zone"><div class="pz-name">Mode</div><div class="pz-sub">${state.mode}</div></div>
+  <div class="phone-zone"><div class="pz-name">Device</div><div class="pz-sub">VRD-ORCH-0142</div></div>`;
+}
+let _lastPhoneRender=0;
+function renderPhone(force){
+  const now = performance.now();
+  if(!force && now-_lastPhoneRender<450) return; // throttle — the 3D mini scene keeps animating regardless
+  _lastPhoneRender = now;
+  document.getElementById('ph-clock').textContent = fmtClock(state.simSeconds).hm;
+  document.getElementById('ph-conn').style.color = state.connection.online? '#374C30':'#9C4B3A';
+  if(state._cmdRunning && phonePane==='orchard') return; // don't clobber the running command animation
+  if(phonePane==='home') document.getElementById('pane-home').innerHTML = phPaneHome();
+  else if(phonePane==='orchard') document.getElementById('pane-orchard-detail').innerHTML = phZoneDetail(state._phoneZone||3);
+  else if(phonePane==='automation') document.getElementById('pane-automation').innerHTML = phPaneAutomation();
+  else if(phonePane==='activity') document.getElementById('pane-activity').innerHTML = phPaneActivity();
+  else if(phonePane==='system') document.getElementById('pane-system').innerHTML = phPaneSystem();
+  document.querySelectorAll('#phone-body [data-zc]').forEach(el=>{
+    el.onclick = ()=>{ state._phoneZone = parseInt(el.dataset.zc); selectPhonePane('orchard'); };
+  });
+  const goBtn = document.getElementById('irrigate-go');
+  if(goBtn) goBtn.onclick = ()=>{
+    const z = state.zones.find(z=>z.id===(state._phoneZone||3));
+    if(z.valve){ if(state.mode!=='MANUAL') state.mode='MANUAL'; closeValve(z,'manual stop, remote'); renderPhone(true); return; }
+    runRemoteCommand(z.id);
+  };
+}
+function runRemoteCommand(zoneId){
+  const z = state.zones.find(z=>z.id===zoneId);
+  const chain = document.getElementById('cmd-chain');
+  if(!chain) return;
+  state._cmdRunning = true;
+  const steps = ['Phone → command sent','Cloud → command received','Controller → command accepted','Valve '+zoneId+' → opening','Water flow → confirmed'];
+  chain.classList.remove('hidden');
+  chain.innerHTML = steps.map((s,i)=>`<div class="cmd-step" id="cmds-${i}"><span class="cs-dot"></span>${s}</div>`).join('');
+  steps.forEach((s,i)=>{
+    setTimeout(()=>{ const el=document.getElementById('cmds-'+i); if(el) el.classList.add('done');
+      if(i===2 && state.mode!=='MANUAL') state.mode='MANUAL';
+      if(i===3) openValve(z,'remote command');
+    }, 320+i*430);
+  });
+  setTimeout(()=>{ state._cmdRunning=false; renderPhone(true); }, 320+steps.length*430+400);
+}
+
+/* ==================================================================
+   PART G — AUTOMATION PANEL (desktop)
+   ================================================================== */
+function initAutomationPanel(){
+  document.getElementById('mode-segment').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    state.mode = b.dataset.mode; log('Control mode set to '+state.mode+'.','info');
+    document.querySelectorAll('#mode-segment button').forEach(x=>x.classList.toggle('active',x===b));
+    renderManualList();
+  });
+  document.getElementById('adv-toggle').addEventListener('click', ()=>{
+    const body = document.getElementById('adv-body');
+    const open = body.classList.toggle('open');
+    document.getElementById('adv-toggle').textContent = open? 'Hide advanced parameters':'Show advanced parameters';
+  });
+  document.getElementById('adv-body').innerHTML = `
+    <div class="thresh-row"><span style="width:150px;font-size:12px;color:var(--ink-dim);">Start below</span><input type="range" id="r-min" min="10" max="60" value="${state.thresholds.min}"><span class="th-val" id="r-min-v">${state.thresholds.min}%</span></div>
+    <div class="thresh-row"><span style="width:150px;font-size:12px;color:var(--ink-dim);">Stop at</span><input type="range" id="r-max" min="40" max="90" value="${state.thresholds.max}"><span class="th-val" id="r-max-v">${state.thresholds.max}%</span></div>
+    <div class="thresh-row"><span style="width:150px;font-size:12px;color:var(--ink-dim);">Max run time</span><input type="range" id="r-time" min="5" max="60" value="${state.thresholds.maxTimeMin}"><span class="th-val" id="r-time-v">${state.thresholds.maxTimeMin}m</span></div>
+    <div class="thresh-row"><span style="width:150px;font-size:12px;color:var(--ink-dim);">Tank safety floor</span><input type="range" id="r-tank" min="5" max="30" value="${state.thresholds.tankSafety}"><span class="th-val" id="r-tank-v">${state.thresholds.tankSafety}%</span></div>
+    <div class="stop-chips" id="stop-chips">
+      <div class="chip on" data-chip="tank">Low tank</div>
+      <div class="chip on" data-chip="rain">Rain</div>
+      <div class="chip on" data-chip="flow">No flow</div>
+      <div class="chip on" data-chip="fault">Any fault</div>
+    </div>`;
+  ['r-min','r-max','r-time','r-tank'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', e=>{
+      const map={'r-min':'min','r-max':'max','r-time':'maxTimeMin','r-tank':'tankSafety'};
+      state.thresholds[map[id]] = parseInt(e.target.value);
+      syncThresholdLabels(); renderRuleFlow();
+    });
+  });
+  document.getElementById('stop-chips').addEventListener('click', e=>{
+    const c = e.target.closest('.chip'); if(!c) return;
+    c.classList.toggle('on'); state.stops[c.dataset.chip] = c.classList.contains('on');
+  });
+  renderManualList();
+}
+function syncThresholdLabels(){
+  document.getElementById('r-min-v').textContent = state.thresholds.min+'%';
+  document.getElementById('r-max-v').textContent = state.thresholds.max+'%';
+  document.getElementById('r-time-v').textContent = state.thresholds.maxTimeMin+'m';
+  document.getElementById('r-tank-v').textContent = state.thresholds.tankSafety+'%';
+}
+function renderRuleFlow(){
+  const el = document.getElementById('rule-flow'); if(!el) return;
+  el.innerHTML = `
+    <div class="rule-block"><div class="rb-tag">When</div><div class="rb-content">Soil moisture drops below <b>${state.thresholds.min}%</b></div></div>
+    <div class="rule-arrow-row">↓</div>
+    <div class="rule-block"><div class="rb-tag">Then</div><div class="rb-content">Open the valve, start the pump</div></div>
+    <div class="rule-arrow-row">↓</div>
+    <div class="rule-block"><div class="rb-tag">Until</div><div class="rb-content">Moisture reaches <b>${state.thresholds.max}%</b></div></div>
+    <div class="rule-arrow-row">↓</div>
+    <div class="rule-block"><div class="rb-tag">Stop if</div><div class="rb-content">Rain, low tank, a pump fault, or no flow is detected</div></div>`;
+}
+function renderManualList(){
+  const list = document.getElementById('manual-list'); if(!list) return;
+  const locked = state.mode!=='MANUAL';
+  list.innerHTML = `<div class="manual-row"><span class="mr-name">Pump</span><span class="mr-state">${state.pump.running?'RUNNING':'OFF'}</span>
+    <div class="mini-toggle ${state.pump.running?'on':''}" id="manual-pump" style="${locked?'opacity:.4;pointer-events:none;':''}"><div class="kb"></div></div></div>` +
+    state.zones.map(z=>`<div class="manual-row"><span class="mr-name">${z.name} — ${z.crop}</span><span class="mr-state">${z.valve?'OPEN':'CLOSED'}</span>
+      <div class="mini-toggle ${z.valve?'on':''}" data-mz="${z.id}" style="${locked?'opacity:.4;pointer-events:none;':''}"><div class="kb"></div></div></div>`).join('');
+  const mp = document.getElementById('manual-pump');
+  if(mp) mp.onclick = ()=>{
+    if(!state.zones.some(z=>z.valve)){ log('Blocked: pump cannot run with every valve closed.','warn'); return; }
+    state.pump.running=!state.pump.running; log('Pump '+(state.pump.running?'started':'stopped')+' (manual).','ok'); renderManualList();
+  };
+  list.querySelectorAll('[data-mz]').forEach(t=>{
+    t.onclick=()=>{ const z=state.zones.find(z=>z.id==t.dataset.mz); if(z.valve) closeValve(z,'manual close'); else openValve(z,'manual'); renderManualList(); };
+  });
+}
+
+/* ==================================================================
+   PART H — TEST SYSTEM (fault simulation)
+   ================================================================== */
+const FAULT_DEFS = [
+  {key:'pumpFailure', name:'Pump failure', chain:['PUMP COMMANDED ON','MOTOR DID NOT START','FAULT LATCHED','ALERT SENT TO PHONE']},
+  {key:'valveFailureZ', name:'Valve stuck — Zone 2', chain:['VALVE 2 COMMAND SENT','NO POSITION CHANGE','VALVE FAULT FLAGGED']},
+  {key:'blockage', name:'Pipe blockage', chain:['PUMP RUNNING','FLOW BELOW EXPECTED','BLOCKAGE SUSPECTED','FLOW SENSOR MONITORING']},
+  {key:'noFlow', name:'Flow sensor failure', chain:['PUMP RUNNING','FLOW = 0 L/MIN','SAFETY WATCHDOG ARMED']},
+  {key:'overcurrent', name:'Excessive pump current', chain:['CURRENT ABOVE RATED LIMIT','OVERCURRENT PROTECTION ARMED']},
+  {key:'soilDisconnectedZ', name:'Soil sensor offline — Zone 3', chain:['SENSOR S-03 SILENT','READING FROZEN','NO DATA SHOWN']},
+  {key:'internetDown', name:'Internet disconnected', chain:['CONTROLLER LOST CLOUD LINK','APP SHOWING STALE DATA']},
+  {key:'rainForced', name:'Rain detected', chain:['RAIN SENSOR TRIGGERED','SMART MODE SUSPENDS IRRIGATION']},
+];
+function initTestPanel(){
+  document.getElementById('test-list').innerHTML = FAULT_DEFS.map(d=>`
+    <div class="test-item"><span class="ti-name">${d.name}</span><div class="mini-toggle" data-fault="${d.key}"><div class="kb"></div></div></div>`).join('');
+  document.querySelectorAll('#test-list [data-fault]').forEach(t=>{
+    t.onclick = ()=>{
+      const key = t.dataset.fault; t.classList.toggle('on');
+      const on = t.classList.contains('on');
+      if(key==='valveFailureZ') state.faults.valveFailure = on?2:null;
+      else if(key==='soilDisconnectedZ') state.faults.soilDisconnected = on?3:null;
+      else state.faults[key] = on;
+      log('Fault simulation: '+key+' set to '+on+'.', on?'warn':'info');
+      const def = FAULT_DEFS.find(d=>d.key===key);
+      if(on) setDiagChain(def.chain);
+    };
+  });
+}
+
+/* ==================================================================
+   PART I — DATA VIEW (timeline + charts)
+   ================================================================== */
+let dataRange=1440;
+function initDataView(){
+  document.getElementById('range-seg').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    dataRange = parseInt(b.dataset.range);
+    document.querySelectorAll('#range-seg button').forEach(x=>x.classList.toggle('active',x===b));
+    renderDataView();
+  });
+  const orig = switchView;
+  switchView = function(view){ orig(view); if(view==='data') renderDataView(); };
+}
+function drawChart(canvasId, series, ymin, ymax, targetLine){
+  const canvas = document.getElementById(canvasId); if(!canvas) return;
+  const dpr = window.devicePixelRatio||1;
+  const w = canvas.clientWidth||300, h = canvas.clientHeight||120;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  const t = state.history.t;
+  const cutoff = state.simSeconds - dataRange*60;
+  let i0 = t.findIndex(x=>x>=cutoff); if(i0<0) i0=0;
+  ctx.strokeStyle='#E3DBC2'; ctx.lineWidth=1;
+  for(let i=0;i<=3;i++){ const y=h*i/3; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  if(typeof targetLine==='number'){
+    const ty = h-((targetLine-ymin)/(ymax-ymin))*h;
+    ctx.setLineDash([4,4]); ctx.strokeStyle='#A97A34'; ctx.beginPath(); ctx.moveTo(0,ty); ctx.lineTo(w,ty); ctx.stroke(); ctx.setLineDash([]);
+  }
+  if(t.length-i0<2){ ctx.fillStyle='#9C9480'; ctx.font='11px JetBrains Mono'; ctx.fillText('Gathering data…',10,h/2); return; }
+  series.forEach(s=>{
+    const d = s.data.slice(i0);
+    ctx.strokeStyle = s.color; ctx.lineWidth=1.8; ctx.beginPath();
+    d.forEach((v,i)=>{ const x=(i/(d.length-1))*w; const y=h-((v-ymin)/(ymax-ymin))*h; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+    ctx.stroke();
+  });
+}
+function renderDataView(){
+  const events = state.logs.filter(l=>/started|closed|stopped|opened|CRITICAL|reset|Fault/.test(l.msg)).slice(-60).reverse();
+  document.getElementById('timeline').innerHTML = events.map(l=>`<div class="tl-row"><span class="tl-time">${l.t}</span><span class="tl-msg ${l.level}">${l.msg}</span></div>`).join('') || '<div class="tl-row"><span class="tl-msg">No events yet.</span></div>';
+  const z3idx = state.zones.findIndex(z=>z.id===3);
+  drawChart('chart-moist', [{data:state.history.moist[z3idx], color:'#A3684C'}], 0, 100, state.thresholds.max);
+  drawChart('chart-tank', [{data:state.history.tank, color:'#374C30'}], 0, 100);
+  drawChart('chart-flow', [{data:state.history.flow, color:'#3B6C85'}], 0, 30);
+  drawChart('chart-temp', [{data:state.history.temp, color:'#A97A34'}], 0, 45);
+}
+
+/* ==================================================================
+   PART J — LIVE DEMO (guided story)
+   ================================================================== */
+function initStory(){
+  document.getElementById('story-close').addEventListener('click', ()=>{ endStory(); clearFollow(); });
+}
+function say(html){
+  document.getElementById('story-text').innerHTML = html;
+  document.getElementById('story-banner').classList.remove('hidden');
+}
+function endStory(){
+  document.getElementById('story-banner').classList.add('hidden');
+  state.storyRunning=false; state.storyPaused=false;
+}
+let followTimers = [];
+function clearFollow(){ followTimers.forEach(t=>clearTimeout(t)); followTimers=[]; }
+function followWater(zoneId){
+  if(state.storyRunning) return; // don't collide with the scripted live demo
+  clearFollow();
+  const z = state.zones.find(z=>z.id===zoneId) || state.zones.slice().sort((a,b)=>a.moisture-b.moisture)[0];
+  state.selected = {kind:'zone', id:z.id};
+  switchView('explore');
+  const STEP = 2600;
+  const steps = [
+    ()=>{ stage.setCameraPreset('water'); say('<div class="sb-step">01 — RESERVOIR</div>Water begins at the reservoir.'); },
+    ()=>{ stage.setCameraPreset('pump'); say('<div class="sb-step">02 — PUMP</div>The pump draws from the tank and pressurizes the line.'); },
+    ()=>{ stage.setCameraPreset('overview'); say('<div class="sb-step">03 — MAIN LINE</div>Water travels the main distribution pipe toward the zones.'); },
+    ()=>{ stage.focusOn('valve',z.id); say(`<div class="sb-step">04 — VALVE V-0${z.id}</div>The zone valve ${z.valve?'is open, releasing':'opens to release'} water into ${z.name}.`); },
+    ()=>{ stage.focusOn('zone',z.id); say(`<div class="sb-step">05 — IRRIGATION</div>Water spreads across the ${z.crop.toLowerCase()} rows.`); },
+    ()=>{ stage.setCameraPreset('root'); say(`<div class="sb-step">06 — ROOT ZONE</div>Underground, water reaches the roots and moisture begins to rise.`); },
+    ()=>{ stage.focusOn('zone',z.id); say(`<b>${z.name} moisture: ${z.moisture.toFixed(0)}%</b> and climbing while the valve stays open.`); },
+  ];
+  steps.forEach((fn,i)=> followTimers.push(setTimeout(fn, i*STEP)));
+  followTimers.push(setTimeout(()=>{ document.getElementById('story-banner').classList.add('hidden'); }, steps.length*STEP+2200));
+}
+function startStory(){
+  if(state.storyRunning) return;
+  clearFollow();
+  document.getElementById('story-banner').classList.remove('hidden');
+  state.storyRunning = true;
+  const z3 = state.zones.find(z=>z.id===3);
+  z3.moisture = 24;
+  switchView('explore');
+  stage.focusOn('zone',3);
+  say('<b>Zone 3 is becoming too dry.</b>');
+  setTimeout(()=>{ stage.focusOn('zone',3); say('<b>The soil sensor detects the change</b> and reports it to the controller.'); },3400);
+  setTimeout(()=>{ stage.focusOn('controller'); say('<b>The controller evaluates the irrigation rule.</b> Moisture is below the threshold.'); },6800);
+  setTimeout(()=>{ switchView('control'); state._phoneZone=3; selectPhonePane('orchard');
+    say('<b>Reviewing on the phone,</b> then approving irrigation for Zone 3.'); },10200);
+  setTimeout(()=>{ say('<b>Command sent</b> — phone → cloud → controller → valve.'); const btn=document.getElementById('irrigate-go'); if(btn && !btn.disabled) btn.click(); },13200);
+  setTimeout(()=>{ switchView('explore'); stage.focusOn('valve',3); say('<b>Water is flowing.</b> Watch Zone 3 recover.'); },17600);
+  setTimeout(()=>{ stage.focusOn('zone',3); say('The controller will close the valve automatically once Zone 3 reaches target moisture. Demonstration complete.'); },21600);
+  setTimeout(endStory, 26000);
+}
+
+boot();
+
+})();
+</script>
+</body>
+</html>
